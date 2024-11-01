@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>W.Hamra · About</title>
+    <title>W.Hamra</title>
+
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles-merged.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.min.css' %}">
@@ -41,9 +42,9 @@
         <nav role="navigation" class="probootstrap-nav hidden-xs">
             <ul class="probootstrap-main-nav">
                 <li><a href="{% url 'index' %}">Home</a></li>
-                <li><a href="{% url 'projects' %}">Projects</a></li>
+                <li class="active"><a href="{% url 'projects' %}">Projects</a></li>
                 <li><a href="{% url 'services' %}">Services</a></li>
-                <li class="active"><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'about' %}">About</a></li>
                 <li><a href="{% url 'contact' %}">Contact</a></li>
             </ul>
             <ul class="probootstrap-right-nav hidden-xs">
@@ -51,8 +52,7 @@
                 <li>
                     <a href="https://mail.google.com/mail/u/1/#inbox?compose=CllgCJlLWMTNrnlgJRQcBgjLcHFkHPRxLwsnhRkrCNgtVXfsJZhPpWqTpMmjfNfXqNMrLRCbGSV"><i
                             class="icon-mail"></i></a></li>
-                <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i class="icon-github2"></i></a>
-                </li>
+                <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i class="icon-github2"></i></a></li>
             </ul>
             <div class="extra-text visible-xs">
                 <a href="#" class="probootstrap-burger-menu"><i>Menu</i></a>
@@ -64,115 +64,71 @@
                     <li>
                         <a href="https://mail.google.com/mail/u/1/#inbox?compose=CllgCJlLWMTNrnlgJRQcBgjLcHFkHPRxLwsnhRkrCNgtVXfsJZhPpWqTpMmjfNfXqNMrLRCbGSV"><i
                                 class="icon-mail"></i></a></li>
-                    <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i
-                            class="icon-github2"></i></a></li>
+                    <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i class="icon-github2"></i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
 </header>
-<!-- END: header -->
-<section class="probootstrap-slider flexslider">
-    <ul class="slides">
-        <li style="background-image: url({% static 'img/buildings.jpg' %});">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-12 text-center">
-                        <div class="slides-text probootstrap-animate">
-                            <h2>About</h2>
-                            <p></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </li>
-    </ul>
+<section class="page-title">
+    <div class="container">
+        <!-- <div class="row">
+          <div class="col-md-12 section-heading"> -->
+        <h1>Health Center</h1>
+        <!-- </div>
+      </div> -->
+    </div>
 </section>
-<!-- END: slider  -->
 
 <section class="probootstrap-section">
     <div class="container">
         <div class="row">
-            <div class="col-md-12 section-heading probootstrap-animate education">
-                <h2><strong>Education</strong></h2>
-                <h3>Data Science / Engineering Degree</h3>
-                <a href="https://fst.rnu.tn/en">@Faculty Of Sciences Of Tunis (FST)</a>
-                <p></p>
-                <p><strong>2022 - 2027</strong></p>
+            <div class="col-md-9">
+                <p><img src="{% static 'img/healthcenter.png' %}" alt="Mohamed Wassim Hamra"
+                        class="img-responsive img-border"></p>
+                <h2>Description</h2>
+                <p>An intuitive web app offering personalized health risk assessments using predictive models.
+                    Empowering users to make informed health decisions through actionable insights.</p>
+
+                <h3>Even the all-powerful...</h3>
+
+                <p>Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic
+                    life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the
+                    far World of Grammar.</p>
+
+                <p>The Big Oxmox advised her not to do so, because there were thousands of bad Commas, wild Question
+                    Marks and devious Semikoli, but the Little Blind Text didn’t listen. She packed her seven versalia,
+                    put her initial into the belt and made herself on the way.</p>
+
+                <p>When she reached the first hills of the Italic Mountains, she had a last view back on the skyline of
+                    her hometown Bookmarksgrove, the headline of Alphabet Village and the subline of her own road, the
+                    Line Lane. Pityful a rethoric question ran over her cheek, then she continued her way.</p>
+
+                <p><a href="https://uicookies.com/" target="_blank" role="button" class="btn btn-primary btn-sm">Visit
+                    Website</a></p>
+
+
             </div>
-            <div class="col-md-12 section-heading probootstrap-animate">
-                <h2><strong>Work Experience</strong></h2>
-                <h3>SQL Developer, Intern</h3>
-                <a href="http://www.simac.tn/">@SIMAC</a>
-                <p><strong>· </strong>Contributed to the development of a tax return file generation microservice,
-                    utilizing SQL and
-                    PL/SQL for the
-                    backend and Delphi for the frontend, aimed at assisting companies in streamlining their tax
-                    processes.</p>
-                <p><strong>· </strong>Collaborated with a cross-functional team to design and implement robust
-                    database structures,
-                    leveraging SQL and
-                    PL/SQL to efficiently store and retrieve tax-related data in Oracle’s Databases.</p>
-                <p><strong>· </strong>Played a vital role in the successful integration of the tax return file
-                    generation microservice
-                    into the SIMAC
-                    Enterprise Resource Planning (ERP) software, enhancing the overall tax management capabilities
-                    of the platform.</p>
-                <p><strong>July 2023</strong></p>
-            </div>
-            <div class="col-md-12 section-heading probootstrap-animate">
-                <h2><strong>Tools & Frameworks</strong></h2>
-                <p><strong>· </strong>
-                    Python | Java | C/C++ | R | Delphi | AWS | Git| PostreSQL | Oracle | Pl/SQL| HTML & CSS | JavaScript
-                    | Django | Flusk
-                    | Pandas | Scikit-Learn | Numpy | Seaborn | Matplotlib | TensorFlow</p>
-            </div>
-            <div class="col-md-12 section-heading probootstrap-animate">
-                <h2><strong>Hobbies</strong></h2>
-                <p><strong>· </strong>
-                    Soccer | Video Games | Coding | Reading </p>
-            </div>
-            <div class="col-md-12 section-heading probootstrap-animate">
-                <a href="https://drive.google.com/file/d/1ZyR9S06aMW3QNjJktqECqDVdYffKrz-h/view?usp=sharing"
-                   align="center"><h2><strong>Download My CV</strong></h2></a>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- END section -->
-<div class="row">
-    <div class="col-md-12 section-heading probootstrap-animate">
-        <h2 align="center">Any Questions ?</h2>
-    </div>
-</div>
-<div class="probootstrap-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 probootstrap-animate" data-animate-effect="fadeInLeft">
+            <div class="col-md-3">
+
 
                 <div class="panel-group probootstrap-panel" id="accordion" role="tablist" aria-multiselectable="true">
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="headingOne">
-                            <h3 class="panel-title">
+                            <h4 class="panel-title">
                                 <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
                                    aria-expanded="true" aria-controls="collapseOne">
 
-                                    Why did you make this website ?
+                                    Business Strategy
                                 </a>
-                            </h3>
+                            </h4>
                         </div>
                         <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel"
                              aria-labelledby="headingOne">
                             <div class="panel-body">
-                                <p>
-                                    I crafted my personal website with a clear purpose in mind: to provide a
-                                    dynamic platform where I could elegantly display my projects, highlight my evolving
-                                    skill set, and narrate my professional journey.
-                                    In a field as competitive as data science, I aimed to set myself apart by infusing
-                                    my unique style and perspective into every pixel.
-                                    This venture also fueled my curiosity to delve into the realm of web development,
-                                    enabling me to embrace new learning avenues and broaden my horizons beyond the
-                                    confines of data analysis.</p>
+                                <p>Far far away, behind the word mountains, far from the countries Vokalia and
+                                    Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right
+                                    at the coast of the Semantics, a large language ocean.</p>
 
 
                             </div>
@@ -180,71 +136,122 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="headingTwo">
-                            <h3 class="panel-title">
+                            <h4 class="panel-title">
                                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
                                    href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    How long have you been practicing Machine Learning ?
+                                    Business Marketing
                                 </a>
-                            </h3>
+                            </h4>
                         </div>
                         <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel"
                              aria-labelledby="headingTwo">
                             <div class="panel-body">
-                                <p>I discovered machine learning at the beginning of 2022 after graduating from Menzah 6
-                                    High School. Since then, I have immersed myself in the data science field by
-                                    studying Data Science at my university, taking online courses to sharpen my skills
-                                    and
-                                    increase my added value and actively participating in data related events and
-                                    hackathons.
-
-                                    I have rich experience in building machine learning solutions for various tasks. I
-                                    have
-                                    built models to assist in sentiment analysis, demographic clustering, and topic
-                                    modelling.
-                                </p>
+                                <p>A small river named Duden flows by their place and supplies it with the necessary
+                                    regelialia. It is a paradisematic country, in which roasted parts of sentences fly
+                                    into your mouth.</p>
 
                             </div>
                         </div>
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="headingThree">
-                            <h3 class="panel-title">
+                            <h4 class="panel-title">
                                 <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion"
                                    href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    Why are you interested in this domain ?
+                                    Business Profit
                                 </a>
-                            </h3>
+                            </h4>
                         </div>
                         <div id="collapseThree" class="panel-collapse collapse" role="tabpanel"
                              aria-labelledby="headingThree">
                             <div class="panel-body">
-                                <p>I am curious by nature. Machine learning and natural language processing are both
-                                    excellent tools to understand the world better.
-
-                                    Despite the hype over integrating AI into existing technologies, the implementation
-                                    of machine learning is still in its infancy. This field is the
-                                    wildwest, and I want to work with the pioneers and innovators that create new and
-                                    amazing things.</p>
+                                <p>Even the all-powerful Pointing has no control about the blind texts it is an almost
+                                    unorthographic life One day however a small line of blind text by the name of Lorem
+                                    Ipsum decided to leave for the far World of Grammar.</p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- END panel-group -->
             </div>
-            <div class="col-md-6 probootstrap-animate" data-animate-effect="fadeInRight">
-
-                 <figure>
-                    <img src="{% static 'img/Numbers.png' %}" alt="Mohamed Wassim Hamra"
-                         class="img-responsive img-border">
-                </figure>
-
-            </div>
         </div>
+    </div>
+</section>
+
+
+<div class="container">
+    <div class="probootstrap-cta probootstrap-animate">
+        <h2 class="mb20">Create a beautiful templates to benefits many.</h2>
+        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind
+            texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language
+            ocean.</p>
+        <p><a href="#" role="button" class="btn btn-primary">Get started</a></p>
     </div>
 </div>
 
+<!-- END section cta -->
 
+<section class="probootstrap-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 section-heading probootstrap-animate">
+                <h2>The Projects</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 probootstrap-animate">
+                <div class="probootstrap-card">
+                    <div class="probootstrap-card-media">
+                        <a href="#"><img src="{% static 'img/slider_1.jpg' %}" class="img-responsive img-border"
+                                         alt="Mohamed Wassim Hamra"></a>
+                    </div>
+                    <div class="probootstrap-card-text">
+                        <h2 class="probootstrap-card-heading mb0">A Clever Bike</h2>
+                        <p class="category">Design &amp; Model</p>
+                        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia,
+                            there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the
+                            Semantics, a large language ocean.</p>
+                        <p><a href="#">View details</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 probootstrap-animate">
+                <div class="probootstrap-card">
+                    <div class="probootstrap-card-media">
+                        <a href="#"><img src="{% static 'img/slider_2.jpg' %}" class="img-responsive img-border"
+                                         alt="Mohamed Wassim Hamra"></a>
+                    </div>
+                    <div class="probootstrap-card-text">
+                        <h2 class="probootstrap-card-heading mb0">Sleek Spaker</h2>
+                        <p class="category">Design</p>
+                        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia,
+                            there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the
+                            Semantics, a large language ocean.</p>
+                        <p><a href="#">View details</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 probootstrap-animate">
+                <div class="probootstrap-card">
+                    <div class="probootstrap-card-media">
+                        <a href="#"><img src="{% static 'img/slider_3.jpg' %}" class="img-responsive img-border"
+                                         alt="Mohamed Wassim Hamra"></a>
+                    </div>
+                    <div class="probootstrap-card-text">
+                        <h2 class="probootstrap-card-heading mb0">Black Person</h2>
+                        <p class="category">Photography</p>
+                        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia,
+                            there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the
+                            Semantics, a large language ocean.</p>
+                        <p><a href="#">View details</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 <!-- END section -->
+
 <footer class="probootstrap-footer probootstrap-bg">
     <div class="container">
         <div class="row mb60">
@@ -289,8 +296,7 @@
                     <p>&copy; 2023 <a href="https://uicookies.com/">uiCookies:Black</a>. Designed by <a
                             href="https://uicookies.com/">uicookies.com</a> <br> Developed by <a
                             href="{% url 'about' %}">Mohamed
-                        Wassim
-                        Hamra</a></p>
+                        Wassim Hamra</a></p>
                 </div>
             </div>
             <div class="col-md-6">
@@ -300,8 +306,8 @@
                         <li>
                             <a href="https://mail.google.com/mail/u/1/#inbox?compose=CllgCJlLWMTNrnlgJRQcBgjLcHFkHPRxLwsnhRkrCNgtVXfsJZhPpWqTpMmjfNfXqNMrLRCbGSV"><i
                                     class="icon-mail"></i></a></li>
-                        <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i
-                                class="icon-github2"></i></a></li>
+                        <li><a href="https://github.com/Wassim-Hamra?tab=repositories"><i class="icon-github2"></i></a>
+                        </li>
                     </ul>
                 </div>
             </div>
