@@ -8,7 +8,7 @@ var flexSlider = function() {
     prevText: "",
     nextText: "",
     slideshowSpeed: 3500, // Adjust to 5 seconds
-    animationSpeed: 700, // Adjust to 1 second
+    animationSpeed: 1000, // Adjust to 1 second
     slideshow: true,
     directionNav: false,
     controlNav: true
