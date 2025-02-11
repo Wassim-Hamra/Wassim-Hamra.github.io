@@ -92,36 +92,26 @@
         <div class="row">
             <div class="col-md-8">
                 <form method="POST" class="probootstrap-form mb60">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="{{ form.first_name.id_for_label }}">First Name</label>
-{#                                {{ form.first_name }}#}
-{#                                {{ form.first_name.errors }}#}
+                                <label for="fname">First Name</label>
                                 <input type="text" class="form-control" id="fname" name="fname">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-{#                                {{ form.last_name }}#}
-{#                                {{ form.last_name.errors }}#}
+                                <label for="lname">Last Name</label>
                                 <input type="text" class="form-control" id="lname" name="lname">
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="{{ form.email.id_for_label }}">Email</label>
-{#                        {{ form.email }}#}
-{#                        {{ form.email.errors }}#}
+                        <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email">
                     </div>
                     <div class="form-group">
-                        <label for="{{ form.message.id_for_label }}">Message</label>
-{#                        {{ form.message }}#}
-{#                        {{ form.message.errors }}#}
+                        <label for="message">Message</label>
                         <textarea cols="30" rows="10" class="form-control" id="message" name="message"></textarea>
                     </div>
                     <div class="form-group">
