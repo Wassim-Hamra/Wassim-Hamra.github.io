@@ -1,5 +1,5 @@
 ### Wassim-Hamra.github.io
-#### link: `wassimhamra.com`
+#### link: `wassimhamra.me`
 
 ## **Description:**
 A personal portfolio website showcasing my professional experience, skills,
