@@ -96,15 +96,7 @@
 </section>
 <!-- END: slider  -->
 
-<div class="container" style="margin-top: 50px;">
-    <div class="probootstrap-cta probootstrap-animate border-bototm-none">
-        <h2 class="mb20">Explore More on GitHub!</h2>
-        <p>
-            This page it outdated. To explore more recent projects not listed here, visit my GitHub profile.</p>
-        <p><a href="https://github.com/Wassim-Hamra" target="_blank" rel="noopener noreferrer" role="button"
-              class="btn btn-primary"><i class="icon-github2"></i> GitHub</a></p>
-    </div>
-</div>
+
 <section class="probootstrap-section">
     <div class="container">
         <div class="row">
@@ -135,7 +127,7 @@
                     <div class="probootstrap-card-media">
                         <a href="under_development.html"><img src="static/img/healthcenter.png"
                                                               class="img-responsive img-border"
-                                                              alt="Mohamed Wassim Hamra"></a>
+                                                              alt="Mohamed Wassim Hamra" style="aspect-ratio: 16/9; object-fit: cover;"></a>
                     </div>
                     <div class="probootstrap-card-text">
                         <h2 class="probootstrap-card-heading mb0">Health Center</h2>
@@ -153,7 +145,7 @@
                     <div class="probootstrap-card-media">
                         <a href="project_website.html"><img src="static/img/screenshot.png"
                                                               class="img-responsive img-border"
-                                                              alt="Mohamed Wassim Hamra"></a>
+                                                              alt="Mohamed Wassim Hamra" style="aspect-ratio: 16/9; object-fit: cover;"></a>
                     </div>
                     <div class="probootstrap-card-text">
                         <h2 class="probootstrap-card-heading mb0">This Website</h2>
@@ -170,6 +162,29 @@
         </div>
     </div>
 </section>
+
+<section class="probootstrap-section" style="padding-top: 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 section-heading probootstrap-animate">
+                <h2>Latest GitHub Repositories</h2>
+                <p>Dynamically fetched from GitHub</p>
+            </div>
+        </div>
+        <div class="row" id="github-repos-container" style="display: flex; flex-wrap: wrap;">
+            <!-- Dynamically populated via JS -->
+            <div class="col-md-12 text-center">
+                <p>Loading repositories...</p>
+            </div>
+        </div>
+        <div class="row">
+             <div class="col-md-12 text-center" style="margin-top: 20px;">
+                 <p><a href="https://github.com/Wassim-Hamra" target="_blank" rel="noopener noreferrer" role="button" class="btn btn-primary"><i class="icon-github2"></i> View All on GitHub</a></p>
+             </div>
+        </div>
+    </div>
+</section>
+
 
 
 <!--<div class="container">-->
