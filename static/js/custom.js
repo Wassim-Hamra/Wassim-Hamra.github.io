@@ -17,6 +17,7 @@ var flexSlider = function() {
 $(document).ready(function() {
   flexSlider(); // Ensure this is called after DOM is loaded
   fetchGitHubRepos(); // Load GitHub repositories
+  initContactForm(); // Initialize AJAX contact form
 });
 
 var fetchGitHubRepos = function() {
@@ -146,6 +147,46 @@ var fetchGitHubRepos = function() {
   .catch(error => {
       console.error('Error fetching repos:', error);
       container.html('<div class="col-md-12 text-center"><p>Error loading repositories. Please visit GitHub directly.</p></div>');
+  });
+};
+
+
+var initContactForm = function() {
+  var form = $('#contact-form');
+  if (form.length === 0) return;
+
+  form.on('submit', function(e) {
+    e.preventDefault();
+
+    var submitBtn = form.find('input[type="submit"]');
+    var alertBox = $('#contact-alert');
+    
+    submitBtn.prop('disabled', true).val('Sending...');
+    alertBox.hide().removeClass('alert-success alert-danger alert-info').text('');
+
+    var formData = form.serialize();
+
+    $.ajax({
+      url: 'https://api.web3forms.com/submit',
+      type: 'POST',
+      data: formData,
+      dataType: 'json'
+    })
+    .done(function(response) {
+      if (response.success) {
+        alertBox.addClass('alert-success').text('Thank you! Your message has been sent successfully.').fadeIn();
+        form.trigger('reset');
+      } else {
+        alertBox.addClass('alert-danger').text(response.message || 'Something went wrong. Please try again.').fadeIn();
+      }
+    })
+    .fail(function(error) {
+      console.error('Contact form error:', error);
+      alertBox.addClass('alert-danger').text('An error occurred. Please try again later.').fadeIn();
+    })
+    .always(function() {
+      submitBtn.prop('disabled', false).val('Send Message');
+    });
   });
 };
 
