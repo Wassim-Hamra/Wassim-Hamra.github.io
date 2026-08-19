@@ -923,35 +923,42 @@ var initLoungeAudioPlayer = function() {
   volumeSlider.val(defaultVol);
 
   var isPlaying = false;
-  var isTimeRestored = false;
+  var isUnloading = false;
 
-  // Restore audio timestamp AFTER audio metadata is loaded into browser memory
-  var restoreAudioTime = function() {
-    if (isTimeRestored) return;
-    var savedTime = sessionStorage.getItem('loungeAudioTime');
-    if (savedTime) {
-      try {
-        var t = parseFloat(savedTime);
-        if (!isNaN(t) && t > 0) {
-          audio.currentTime = t;
-          isTimeRestored = true;
-        }
-      } catch (e) {}
-    }
-  };
+  // Prevent page teardown from overwriting sessionStorage with 0.000
+  $(window).on('beforeunload pagehide', function() {
+    isUnloading = true;
+  });
 
-  audio.onloadedmetadata = restoreAudioTime;
-  audio.oncanplay = restoreAudioTime;
-
+  // Track playback time continuously (ignore resets during page teardown)
   audio.ontimeupdate = function() {
-    if (audio.currentTime > 0) {
+    if (!isUnloading && audio.currentTime > 0.3) {
       sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
     }
   };
 
+  var restoreAudioTime = function() {
+    var savedTimeStr = sessionStorage.getItem('loungeAudioTime');
+    if (savedTimeStr) {
+      var savedTime = parseFloat(savedTimeStr);
+      if (!isNaN(savedTime) && savedTime > 0.3) {
+        try {
+          if (Math.abs(audio.currentTime - savedTime) > 0.5) {
+            audio.currentTime = savedTime;
+          }
+        } catch (e) {}
+      }
+    }
+  };
+
+  // Restore timestamp as soon as audio metadata/buffer is ready
+  audio.addEventListener('loadedmetadata', restoreAudioTime);
+  audio.addEventListener('canplay', restoreAudioTime);
+
   var playAudio = function() {
     restoreAudioTime();
     audio.play().then(function() {
+      restoreAudioTime();
       isPlaying = true;
       widget.addClass('playing');
       cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
