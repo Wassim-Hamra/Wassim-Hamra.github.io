@@ -124,6 +124,77 @@
 </section>
 <!-- END: slider  -->
 
+<section class="probootstrap-section agent-visualizer-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 section-heading probootstrap-animate">
+                <h2 align="center"><strong>Live AI Agent Simulation</strong></h2>
+                <p class="text-center" style="color: #8b949e; max-width: 600px; margin: 0 auto 30px;">
+                    Watch a LangGraph-style agent reason through a request step-by-step.
+                </p>
+                <div class="text-center" style="margin-bottom: 40px;">
+                    <button class="btn btn-primary" id="btn-run-agent" style="border-radius: 30px; padding: 10px 30px; font-weight: 600;">
+                        <i class="icon-play3"></i> Run Agent Simulation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Panel: Graph Diagram -->
+            <div class="col-md-5 col-sm-12 probootstrap-animate" data-animate-effect="fadeInLeft">
+                <div class="agent-graph-container">
+                    <div class="agent-node" id="node-request">
+                        <div class="node-icon"><i class="icon-user"></i></div>
+                        <div class="node-text">User Request</div>
+                    </div>
+                    <div class="agent-arrow"><i class="icon-arrow-down"></i></div>
+
+                    <div class="agent-node" id="node-planner">
+                        <div class="node-icon"><i class="icon-map"></i></div>
+                        <div class="node-text">Agent Planner</div>
+                    </div>
+                    <div class="agent-arrow"><i class="icon-arrow-down"></i></div>
+
+                    <div class="agent-node" id="node-retriever">
+                        <div class="node-icon"><i class="icon-database"></i></div>
+                        <div class="node-text">Vector RAG Retrieval</div>
+                    </div>
+                    <div class="agent-arrow"><i class="icon-arrow-down"></i></div>
+
+                    <div class="agent-node" id="node-reasoner">
+                        <div class="node-icon"><i class="icon-lightbulb"></i></div>
+                        <div class="node-text">LLM Reasoner</div>
+                    </div>
+                    <div class="agent-arrow"><i class="icon-arrow-down"></i></div>
+
+                    <div class="agent-node" id="node-output">
+                        <div class="node-icon"><i class="icon-check"></i></div>
+                        <div class="node-text">Final Output</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Terminal Stream -->
+            <div class="col-md-7 col-sm-12 probootstrap-animate" data-animate-effect="fadeInRight">
+                <div class="agent-terminal-window">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="close-btn"></span>
+                            <span class="min-btn"></span>
+                            <span class="max-btn"></span>
+                        </div>
+                        <div class="terminal-title">agent-execution.log</div>
+                    </div>
+                    <div class="terminal-body" id="agent-terminal-body">
+                        <div class="terminal-line text-muted">Waiting for execution... Press 'Run Agent Simulation'</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="probootstrap-section">
     <div class="container">
         <div class="row">
