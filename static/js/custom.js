@@ -21,6 +21,7 @@ $(document).ready(function() {
   initCommandPalette(); // Initialize Command Palette (Ctrl+K)
   initSkillBars(); // Animate technical skill progress bars
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
+  initTimelineAnimation(); // Initialize scroll-animated timeline for about page
 });
 
 var fetchGitHubRepos = function() {
@@ -722,6 +723,28 @@ var initAIChatbot = function() {
 
   // Initial suggestions render
   renderSuggestions();
+};
+
+var initTimelineAnimation = function() {
+  var items = $('.timeline-item');
+  if (items.length === 0) return;
+
+  var checkScroll = function() {
+    items.each(function() {
+      var item = $(this);
+      var itemTop = item.offset().top;
+      var winBottom = $(window).scrollTop() + $(window).height();
+      
+      // If item is scrolled into view (with a small offset)
+      if (winBottom > itemTop + 40) {
+        item.addClass('visible');
+      }
+    });
+  };
+
+  // Bind events and check immediately
+  $(window).on('scroll resize', checkScroll);
+  setTimeout(checkScroll, 100);
 };
 
 });
