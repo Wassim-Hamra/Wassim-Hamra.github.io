@@ -22,6 +22,7 @@ $(document).ready(function() {
   initSkillBars(); // Animate technical skill progress bars
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
+  initLoungeAudioPlayer(); // Initialize subtle lounge audio player
 });
 
 var fetchGitHubRepos = function() {
@@ -747,18 +748,122 @@ var initTimelineAnimation = function() {
   setTimeout(checkScroll, 100);
 };
 
-var initFooterActions = function() {
-  $(document).on('click', '#footer-cmd-trigger', function(e) {
-    e.preventDefault();
-    $('#cmd-palette-btn').trigger('click');
+var initLoungeAudioPlayer = function() {
+  var playerHtml = `
+    <div class="lounge-player-widget" id="lounge-player-widget">
+      <div class="lounge-player-card" id="lounge-player-card">
+        <div class="lounge-track-info">
+          <span class="lounge-track-title">Lounge Jazz Vibes</span>
+          <span class="lounge-track-subtitle">Low-key Ambient</span>
+        </div>
+        <div class="lounge-controls">
+          <button class="lounge-btn" id="lounge-card-play-btn" title="Play / Pause">
+            <i class="icon-play2" id="lounge-card-play-icon"></i>
+          </button>
+          <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
+            <i class="icon-volume-medium" id="lounge-mute-icon"></i>
+          </button>
+          <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.15" title="Volume">
+        </div>
+      </div>
+      <button class="lounge-player-toggle" id="lounge-player-toggle" title="Toggle Lounge Music">
+        <div class="lounge-eq-bars" id="lounge-eq-bars">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </button>
+      <audio id="lounge-audio" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+  `;
+  $('body').append(playerHtml);
+
+  var widget = $('#lounge-player-widget');
+  var audio = $('#lounge-audio')[0];
+  var toggleBtn = $('#lounge-player-toggle');
+  var cardPlayBtn = $('#lounge-card-play-btn');
+  var cardPlayIcon = $('#lounge-card-play-icon');
+  var muteBtn = $('#lounge-mute-btn');
+  var muteIcon = $('#lounge-mute-icon');
+  var volumeSlider = $('#lounge-volume-slider');
+
+  // Set default low-key volume (15%)
+  audio.volume = 0.15;
+  volumeSlider.val(0.15);
+
+  var isPlaying = false;
+
+  var playAudio = function() {
+    audio.play().then(function() {
+      isPlaying = true;
+      widget.addClass('playing');
+      cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
+      sessionStorage.setItem('loungeAudioState', 'playing');
+    }).catch(function(e) {
+      console.log('Autoplay deferred for user click:', e);
+    });
+  };
+
+  var pauseAudio = function() {
+    audio.pause();
+    isPlaying = false;
+    widget.removeClass('playing');
+    cardPlayIcon.removeClass('icon-pause2').addClass('icon-play2');
+    sessionStorage.setItem('loungeAudioState', 'paused');
+  };
+
+  var togglePlay = function() {
+    if (isPlaying) {
+      pauseAudio();
+    } else {
+      playAudio();
+    }
+  };
+
+  // Toggle button click
+  toggleBtn.on('click', function(e) {
+    e.stopPropagation();
+    widget.toggleClass('active');
+    togglePlay();
   });
 
-  $(document).on('click', '.footer-back-to-top-btn', function(e) {
-    e.preventDefault();
-    $('html, body').animate({ scrollTop: 0 }, 500);
+  // Card Play button click
+  cardPlayBtn.on('click', function(e) {
+    e.stopPropagation();
+    togglePlay();
   });
+
+  // Volume slider input
+  volumeSlider.on('input change', function() {
+    var val = parseFloat($(this).val());
+    audio.volume = val;
+    if (val === 0) {
+      muteIcon.removeClass('icon-volume-medium icon-volume-high').addClass('icon-volume-mute2');
+    } else {
+      muteIcon.removeClass('icon-volume-mute2').addClass('icon-volume-medium');
+    }
+  });
+
+  // Mute button click
+  muteBtn.on('click', function(e) {
+    e.stopPropagation();
+    if (audio.volume > 0) {
+      audio.dataset.prevVolume = audio.volume;
+      audio.volume = 0;
+      volumeSlider.val(0);
+      muteIcon.removeClass('icon-volume-medium icon-volume-high').addClass('icon-volume-mute2');
+    } else {
+      var prev = parseFloat(audio.dataset.prevVolume) || 0.15;
+      audio.volume = prev;
+      volumeSlider.val(prev);
+      muteIcon.removeClass('icon-volume-mute2').addClass('icon-volume-medium');
+    }
+  });
+
+  // Seamless playback across page navigation
+  if (sessionStorage.getItem('loungeAudioState') === 'playing') {
+    playAudio();
+  }
 };
-
-initFooterActions();
 
 });
