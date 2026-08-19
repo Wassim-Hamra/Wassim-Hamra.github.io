@@ -761,22 +761,20 @@ var initLoungeAudioPlayer = function() {
               <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
             </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="island-brand-label">Dynamic Island</span>
-            <div class="lounge-eq-bars">
-              <span></span><span></span><span></span><span></span>
-            </div>
+          <div class="lounge-eq-bars">
+            <span></span><span></span><span></span><span></span>
           </div>
         </div>
 
         <!-- Expanded Content -->
         <div class="island-expanded-content">
+          <div class="island-top-notch-tag">DYNAMIC ISLAND</div>
+          
           <div class="island-expanded-top">
             <span class="island-location-badge">
               <i class="icon-location2"></i> <span id="expanded-location-text">Detecting...</span>
             </span>
             <span id="expanded-weather-badge" style="font-size:11px;"></span>
-            <span class="island-brand-label">Dynamic Island</span>
             <span class="island-time-badge">
               <i class="icon-clock2"></i> <span id="expanded-time-text">--:--</span>
             </span>
