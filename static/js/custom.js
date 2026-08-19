@@ -174,8 +174,7 @@ var initContactForm = function() {
     })
     .done(function(response) {
       if (response.success) {
-        alertBox.addClass('alert-success').text('Thank you! Your message has been sent successfully.').fadeIn();
-        form.trigger('reset');
+        window.location.href = 'message_sent.html';
       } else {
         alertBox.addClass('alert-danger').text(response.message || 'Something went wrong. Please try again.').fadeIn();
       }
