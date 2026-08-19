@@ -20,6 +20,7 @@ $(document).ready(function() {
   initContactForm(); // Initialize AJAX contact form
   initCommandPalette(); // Initialize Command Palette (Ctrl+K)
   initSkillBars(); // Animate technical skill progress bars
+  initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
 });
 
 var fetchGitHubRepos = function() {
@@ -396,6 +397,158 @@ var initSkillBars = function() {
 
   // Animate when the Skills collapse panel is shown
   $('#collapseTwo').on('shown.bs.collapse', animate);
+};
+
+var initAIChatbot = function() {
+  // 1. Inject HTML
+  var chatbotHtml = `
+    <div class="ai-chat-widget">
+      <div class="ai-chat-toggle" id="ai-chat-toggle" title="Ask Wassim's AI">
+        <i class="icon-chat"></i>
+      </div>
+      <div class="ai-chat-window" id="ai-chat-window">
+        <div class="ai-chat-header">
+          <div class="ai-chat-header-info">
+            <div class="ai-chat-avatar">AI</div>
+            <div class="ai-chat-title-group">
+              <span class="ai-chat-title">Ask Wassim AI</span>
+              <span class="ai-chat-subtitle"><span class="ai-chat-status-dot"></span> Active</span>
+            </div>
+          </div>
+          <button class="ai-chat-close" id="ai-chat-close">&times;</button>
+        </div>
+        <div class="ai-chat-body" id="ai-chat-body">
+          <div class="ai-chat-message assistant">
+            Hi! I'm Wassim's AI assistant. Ask me anything about my projects, internships, or hobbies!
+          </div>
+          <div class="ai-chat-suggestions" id="ai-chat-suggestions">
+            <button class="ai-chat-suggestion" data-q="What did you build during your Hexabyte internship?">What did you do at Hexabyte?</button>
+            <button class="ai-chat-suggestion" data-q="Which projects of yours are you most proud of?">Which projects are you proudest of?</button>
+            <button class="ai-chat-suggestion" data-q="Are you more of an AI engineer or systems programmer?">AI engineer or systems programmer?</button>
+            <button class="ai-chat-suggestion" data-q="What sports teams do you cheer for?">What sports teams do you cheer for?</button>
+          </div>
+        </div>
+        <div class="ai-chat-footer">
+          <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Type a message..." autocomplete="off">
+          <button class="ai-chat-send" id="ai-chat-send"><i class="icon-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  `;
+  $('body').append(chatbotHtml);
+
+  var toggleBtn = $('#ai-chat-toggle');
+  var chatWindow = $('#ai-chat-window');
+  var closeBtn = $('#ai-chat-close');
+  var sendBtn = $('#ai-chat-send');
+  var chatInput = $('#ai-chat-input');
+  var chatBody = $('#ai-chat-body');
+  var suggestions = $('#ai-chat-suggestions');
+
+  // Toggle Window
+  toggleBtn.on('click', function() {
+    chatWindow.toggleClass('open');
+    toggleBtn.toggleClass('active');
+    if (chatWindow.hasClass('open')) {
+      chatInput.focus();
+      scrollToBottom();
+    }
+  });
+
+  closeBtn.on('click', function() {
+    chatWindow.removeClass('open');
+    toggleBtn.removeClass('active');
+  });
+
+  // Scroll function
+  var scrollToBottom = function() {
+    chatBody.scrollTop(chatBody[0].scrollHeight);
+  };
+
+  // Predefined Q&A mapping
+  var getResponse = function(query) {
+    var q = query.toLowerCase();
+    
+    if (q.includes('hexabyte')) {
+      return "At Hexabyte, I built a PyTorch churn-prediction model to identify at-risk customers, created executive Tableau dashboards, and automated database/subscription updates using custom Python scripts.";
+    }
+    if (q.includes('proud') || q.includes('project') || q.includes('best') || q.includes('proudest')) {
+      return "I'm really proud of my <strong>Video-Transcription-Translation-AI-System</strong> and my from-scratch <strong>Transformer_PyTorch</strong> implementation. Building a Transformer from scratch solidified my ML foundation, while the translation tool is a practical AI pipeline with real-world utility!";
+    }
+    if (q.includes('system') || q.includes('low') || q.includes('programmer') || q.includes('engineer') || q.includes('rust') || q.includes('c++')) {
+      return "I love both! My primary focus is on AI agents, LLMs, and RAG architectures (using PyTorch, LangChain, and LangGraph), but I also love systems level programming—I've built a custom command shell in Rust and worked with C++.";
+    }
+    if (q.includes('sport') || q.includes('f1') || q.includes('ferrari') || q.includes('football') || q.includes('club') || q.includes('africain')) {
+      return "I'm a massive fan of the Scuderia Ferrari F1 Team (Forza Ferrari! 🏎️) and a dedicated supporter of Club Africain in football/soccer! 🔴⚪";
+    }
+    if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
+      return "Hello! How can I help you today? Feel free to ask about my projects, internships, or interests!";
+    }
+    
+    return "That's a great question! I'm still learning, but you can explore my <a href='projects.html' style='color:#22eaaa;text-decoration:underline;'>Projects</a>, read more <a href='about.html' style='color:#22eaaa;text-decoration:underline;'>About me</a>, or reach out to me directly on the <a href='contact.html' style='color:#22eaaa;text-decoration:underline;'>Contact page</a>!";
+  };
+
+  // Send Message Logic
+  var handleSend = function(text) {
+    if (!text || text.trim() === '') return;
+    
+    // Add user message
+    var userMsgHtml = `<div class="ai-chat-message user">${text}</div>`;
+    // Insert before suggestions (or append if suggestions are detached)
+    if (suggestions.parent().length > 0) {
+      suggestions.before(userMsgHtml);
+    } else {
+      chatBody.append(userMsgHtml);
+    }
+    scrollToBottom();
+
+    // Detach suggestions during typing
+    suggestions.detach();
+
+    // Add typing indicator
+    var typingHtml = `
+      <div class="ai-chat-typing" id="ai-chat-typing">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    `;
+    chatBody.append(typingHtml);
+    scrollToBottom();
+
+    setTimeout(function() {
+      $('#ai-chat-typing').remove();
+      var answer = getResponse(text);
+      var assistantMsgHtml = `<div class="ai-chat-message assistant">${answer}</div>`;
+      chatBody.append(assistantMsgHtml);
+      
+      // Re-attach suggestions at the end
+      chatBody.append(suggestions);
+      scrollToBottom();
+    }, 1000);
+  };
+
+  // Bind click on suggestions
+  chatBody.on('click', '.ai-chat-suggestion', function() {
+    var text = $(this).attr('data-q');
+    handleSend(text);
+  });
+
+  // Bind click on send button
+  sendBtn.on('click', function() {
+    var text = chatInput.val();
+    chatInput.val('');
+    handleSend(text);
+  });
+
+  // Bind Enter key press
+  chatInput.on('keypress', function(e) {
+    if (e.which === 13) {
+      var text = chatInput.val();
+      chatInput.val('');
+      handleSend(text);
+    }
+  });
 };
 
 });
