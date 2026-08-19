@@ -751,7 +751,7 @@ var initTimelineAnimation = function() {
 var initLoungeAudioPlayer = function() {
   var playerHtml = `
     <div class="dynamic-island-widget" id="lounge-player-widget">
-      <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle player & visitor info">
+      <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle player & info">
         
         <!-- Collapsed Content -->
         <div class="island-collapsed-content">
@@ -775,10 +775,14 @@ var initLoungeAudioPlayer = function() {
         <div class="island-expanded-content">
           <div class="island-expanded-top">
             <span class="island-location-badge">
-              <i class="icon-location2"></i> <span id="expanded-location-text">Detecting location...</span>
+              <i class="icon-location2"></i> <span id="expanded-location-text">Detecting...</span>
             </span>
+            <span id="expanded-weather-badge" style="font-size:11px;"></span>
             <span class="island-time-badge">
               <i class="icon-clock2"></i> <span id="expanded-time-text">--:--</span>
+            </span>
+            <span id="expanded-battery-badge" class="island-time-badge" style="color:#22eaaa;">
+              <span id="expanded-battery-text"></span>
             </span>
           </div>
           
@@ -794,7 +798,7 @@ var initLoungeAudioPlayer = function() {
               <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
                 <i class="icon-volume-medium" id="lounge-mute-icon"></i>
               </button>
-              <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.15" title="Volume">
+              <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.08" title="Volume">
             </div>
           </div>
         </div>
@@ -823,7 +827,7 @@ var initLoungeAudioPlayer = function() {
     var minutes = now.getMinutes();
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
-    hours = hours ? hours : 12; // '0' should be '12'
+    hours = hours ? hours : 12;
     var minutesStr = minutes < 10 ? '0' + minutes : minutes;
     var timeFormatted = hours + ':' + minutesStr + ' ' + ampm;
 
@@ -834,60 +838,130 @@ var initLoungeAudioPlayer = function() {
   updateVisitorTime();
   setInterval(updateVisitorTime, 1000);
 
-  // Fetch visitor IP geolocation with reliable fallbacks (Country only)
-  var setLocationText = function(city, country) {
-    var countryOnly = country || city || 'Earth';
-    $('#visitor-location-short').text(countryOnly);
-    $('#expanded-location-text').text(countryOnly);
+  // Cached Geolocation & Open-Meteo Weather
+  var formatWeather = function(temp, code, isDay) {
+    var symbol = '☀️';
+    if (isDay === 0) symbol = '🌙';
+    if (code >= 1 && code <= 3) symbol = '⛅';
+    if (code >= 45 && code <= 48) symbol = '🌫️';
+    if (code >= 51 && code <= 82) symbol = '🌧️';
+    if (code >= 95) symbol = '⛈️';
+    return symbol + ' ' + Math.round(temp) + '°C';
   };
 
-  var fetchVisitorLocation = function() {
+  var applyGeoAndWeather = function(country, weatherText) {
+    var countryDisplay = country || 'Earth';
+    $('#visitor-location-short').text(countryDisplay);
+    $('#expanded-location-text').text(countryDisplay);
+    if (weatherText) {
+      $('#expanded-weather-badge').html('<span style="color:#22eaaa;">' + weatherText + '</span>');
+    }
+  };
+
+  var fetchVisitorLocationAndWeather = function() {
+    // 1. Check if cached in sessionStorage to prevent re-fetching on every page navigation
+    var cached = sessionStorage.getItem('visitorGeoData');
+    if (cached) {
+      try {
+        var cachedObj = JSON.parse(cached);
+        applyGeoAndWeather(cachedObj.country, cachedObj.weatherText);
+        return;
+      } catch (e) {}
+    }
+
+    // 2. Fetch IP Geolocation
     $.getJSON('https://ipapi.co/json/', function(data) {
-      if (data && (data.country_name || data.country)) {
-        setLocationText(data.city, data.country_name || data.country);
-      } else {
-        fetchFallbackLocation();
-      }
-    }).fail(fetchFallbackLocation);
-  };
+      var country = data.country_name || data.country || 'Tunisia';
+      var lat = data.latitude;
+      var lon = data.longitude;
 
-  var fetchFallbackLocation = function() {
-    $.getJSON('https://ipwho.is/', function(data) {
-      if (data && data.success && (data.country || data.city)) {
-        setLocationText(data.city, data.country);
+      if (lat && lon) {
+        // Fetch Weather
+        $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true', function(weatherRes) {
+          var w = weatherRes.current_weather;
+          var weatherText = formatWeather(w.temperature, w.weathercode, w.is_day);
+          sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: weatherText }));
+          applyGeoAndWeather(country, weatherText);
+        }).fail(function() {
+          sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: '' }));
+          applyGeoAndWeather(country, '');
+        });
       } else {
-        setLocationText('', 'Tunisia');
+        sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: '' }));
+        applyGeoAndWeather(country, '');
       }
     }).fail(function() {
-      setLocationText('', 'Tunisia');
+      // Fallback Geolocation API
+      $.getJSON('https://ipwho.is/', function(data2) {
+        var country = data2.country || 'Tunisia';
+        var lat = data2.latitude;
+        var lon = data2.longitude;
+        if (lat && lon) {
+          $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true', function(weatherRes) {
+            var w = weatherRes.current_weather;
+            var weatherText = formatWeather(w.temperature, w.weathercode, w.is_day);
+            sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: weatherText }));
+            applyGeoAndWeather(country, weatherText);
+          }).fail(function() {
+            sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: '' }));
+            applyGeoAndWeather(country, '');
+          });
+        } else {
+          sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: '' }));
+          applyGeoAndWeather(country, '');
+        }
+      }).fail(function() {
+        sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: 'Tunisia', weatherText: '' }));
+        applyGeoAndWeather('Tunisia', '');
+      });
     });
   };
 
-  fetchVisitorLocation();
+  fetchVisitorLocationAndWeather();
 
-  // Lower default volume (8% for subtle ambient feel)
+  // Web Battery API
+  if (navigator.getBattery) {
+    navigator.getBattery().then(function(battery) {
+      var updateBattery = function() {
+        var level = Math.round(battery.level * 100);
+        var icon = battery.charging ? '⚡' : '🔋';
+        $('#expanded-battery-text').text(icon + ' ' + level + '%');
+      };
+      updateBattery();
+      battery.onlevelchange = updateBattery;
+      battery.onchargingchange = updateBattery;
+    });
+  }
+
+  // Audio setup: Lower default volume (8%)
   var defaultVol = 0.08;
   audio.volume = defaultVol;
   volumeSlider.val(defaultVol);
 
   var isPlaying = false;
+  var isTimeRestored = false;
 
-  // Track playback time continuously so it doesn't reset on page changes
-  audio.ontimeupdate = function() {
-    if (audio.currentTime > 0) {
-      sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
-    }
-  };
-
+  // Restore audio timestamp AFTER audio metadata is loaded into browser memory
   var restoreAudioTime = function() {
+    if (isTimeRestored) return;
     var savedTime = sessionStorage.getItem('loungeAudioTime');
     if (savedTime) {
       try {
         var t = parseFloat(savedTime);
         if (!isNaN(t) && t > 0) {
           audio.currentTime = t;
+          isTimeRestored = true;
         }
       } catch (e) {}
+    }
+  };
+
+  audio.onloadedmetadata = restoreAudioTime;
+  audio.oncanplay = restoreAudioTime;
+
+  audio.ontimeupdate = function() {
+    if (audio.currentTime > 0) {
+      sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
     }
   };
 
@@ -899,7 +973,6 @@ var initLoungeAudioPlayer = function() {
       cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
       sessionStorage.setItem('loungeAudioState', 'playing');
     }).catch(function(e) {
-      // If browser blocks silent autoplay without gesture, play on first user touch/scroll/click
       $(document).one('click scroll keydown touchstart', function() {
         if (!isPlaying) {
           playAudio();
