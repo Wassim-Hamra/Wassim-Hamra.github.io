@@ -882,8 +882,8 @@
 }
 
 .dynamic-island-capsule {
-    background: rgba(15, 17, 20, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(18, 22, 28, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 24px;
     padding: 0 22px;
     height: 48px;
@@ -891,9 +891,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(34, 234, 170, 0.12);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     cursor: pointer;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -902,21 +902,24 @@
 }
 
 .dynamic-island-capsule:hover {
-    border-color: rgba(34, 234, 170, 0.4);
-    box-shadow: 0 14px 45px rgba(34, 234, 170, 0.3);
+    background: rgba(22, 28, 36, 0.55);
+    border-color: rgba(34, 234, 170, 0.5);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 30px rgba(34, 234, 170, 0.3);
     width: 330px;
 }
 
-/* Expanded Taskbar Popup State (Spacious Upward Morph) */
+/* Expanded Taskbar Popup State (Ultra-Glassy Translucent Frosted Glass) */
 .dynamic-island-widget.expanded .dynamic-island-capsule {
     width: 500px;
     max-width: 92vw;
     height: 106px;
     border-radius: 28px;
     padding: 16px 26px 20px 26px;
-    background: rgba(17, 19, 21, 0.96);
-    border-color: rgba(34, 234, 170, 0.4);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+    background: rgba(16, 20, 26, 0.65);
+    border-color: rgba(34, 234, 170, 0.45);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 35px rgba(34, 234, 170, 0.2);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -1006,33 +1009,6 @@
     display: flex;
     align-items: center;
     gap: 5px;
-}
-
-.island-top-notch-tag {
-    position: absolute;
-    top: -24px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 8px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: rgba(255, 255, 255, 0.35);
-    background: rgba(15, 17, 20, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 2px 10px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    white-space: nowrap;
-    pointer-events: none;
-    transition: color 0.25s ease, border-color 0.25s ease;
-}
-
-.dynamic-island-capsule:hover .island-top-notch-tag {
-    color: #22eaaa;
-    border-color: rgba(34, 234, 170, 0.35);
 }
 
 /* Expanded Bottom Row */
