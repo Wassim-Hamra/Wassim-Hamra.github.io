@@ -19,6 +19,7 @@ $(document).ready(function() {
   fetchGitHubRepos(); // Load GitHub repositories dynamically
   initContactForm(); // Initialize AJAX contact form
   initCommandPalette(); // Initialize Command Palette (Ctrl+K)
+  initSkillBars(); // Animate technical skill progress bars
 });
 
 var fetchGitHubRepos = function() {
@@ -375,6 +376,27 @@ var initCommandPalette = function() {
     selectedIndex = index;
     executeActiveItem();
   });
+};
+
+var initSkillBars = function() {
+  var fills = $('.skill-progress-fill');
+  if (fills.length === 0) return;
+
+  var animateBars = function() {
+    fills.each(function() {
+      var bar = $(this);
+      var targetPercent = bar.attr('data-percent');
+      var barTop = bar.offset().top;
+      var winBottom = $(window).scrollTop() + $(window).height();
+      
+      if (winBottom > barTop - 50) {
+        bar.css('width', targetPercent);
+      }
+    });
+  };
+
+  animateBars();
+  $(window).on('scroll', animateBars);
 };
 
 });
