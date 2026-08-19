@@ -22,6 +22,7 @@ $(document).ready(function() {
   initSkillBars(); // Animate technical skill progress bars
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
+  initThemeSwitcher(); // Initialize navbar color theme switcher dropdown
 });
 
 var fetchGitHubRepos = function() {
@@ -745,6 +746,61 @@ var initTimelineAnimation = function() {
   // Bind events and check immediately
   $(window).on('scroll resize', checkScroll);
   setTimeout(checkScroll, 100);
+};
+
+var initThemeSwitcher = function() {
+  var target = $('.probootstrap-right-nav.hidden-xs');
+  if (target.length === 0) return;
+
+  var currentTheme = localStorage.getItem('portfolio-theme') || 'green';
+
+  var switcherHtml = `
+    <li class="theme-switcher-container">
+      <a href="#" id="theme-switcher-btn" title="Change Theme Color"><i class="icon-cog"></i></a>
+      <div class="theme-switcher-dropdown" id="theme-switcher-dropdown">
+        <span class="theme-dropdown-title">Theme Accent</span>
+        <div class="theme-colors-grid">
+          <button class="theme-color-btn green ${currentTheme === 'green' ? 'active' : ''}" data-theme="green" style="background-color: #22eaaa;" title="Brand Green"></button>
+          <button class="theme-color-btn red ${currentTheme === 'red' ? 'active' : ''}" data-theme="red" style="background-color: #ff1801;" title="Ferrari Red"></button>
+          <button class="theme-color-btn purple ${currentTheme === 'purple' ? 'active' : ''}" data-theme="purple" style="background-color: #b026ff;" title="Cyber Purple"></button>
+          <button class="theme-color-btn blue ${currentTheme === 'blue' ? 'active' : ''}" data-theme="blue" style="background-color: #1f75fe;" title="Classic Blue"></button>
+        </div>
+      </div>
+    </li>
+  `;
+  target.append(switcherHtml);
+
+  // Set initial active state in HTML element
+  $('html').attr('data-theme', currentTheme);
+
+  // Toggle dropdown on click
+  $('#theme-switcher-btn').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    $('#theme-switcher-dropdown').toggleClass('open');
+  });
+
+  // Close on click outside
+  $(document).on('click', function() {
+    $('#theme-switcher-dropdown').removeClass('open');
+  });
+
+  $('#theme-switcher-dropdown').on('click', function(e) {
+    e.stopPropagation();
+  });
+
+  // Handle color option click
+  $('.theme-color-btn').on('click', function() {
+    var theme = $(this).attr('data-theme');
+    
+    // Update data attribute and active states
+    $('html').attr('data-theme', theme);
+    $('.theme-color-btn').removeClass('active');
+    $(this).addClass('active');
+    
+    // Save selection
+    localStorage.setItem('portfolio-theme', theme);
+  });
 };
 
 });

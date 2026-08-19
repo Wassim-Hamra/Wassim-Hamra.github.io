@@ -1,4 +1,244 @@
-/* additional css code goes here */
+/* ==========================================================================
+   Color Themes & CSS Variables
+   ========================================================================== */
+:root, html[data-theme="green"] {
+    --accent-color: #22eaaa;
+    --accent-color-hover: #39ecb3;
+    --accent-color-rgb: 34, 234, 170;
+}
+
+html[data-theme="red"] {
+    --accent-color: #ff1801;          /* Ferrari Red! */
+    --accent-color-hover: #e30000;
+    --accent-color-rgb: 255, 24, 1;
+}
+
+html[data-theme="purple"] {
+    --accent-color: #b026ff;         /* Cyber Purple */
+    --accent-color-hover: #9c00ff;
+    --accent-color-rgb: 176, 38, 255;
+}
+
+html[data-theme="blue"] {
+    --accent-color: #1f75fe;          /* Classic Blue */
+    --accent-color-hover: #005ad4;
+    --accent-color-rgb: 31, 117, 254;
+}
+
+/* Accent Overrides for Base Template */
+a {
+    color: var(--accent-color);
+}
+.probootstrap-main-nav li.active a {
+    color: var(--accent-color) !important;
+}
+.probootstrap-main-nav li.active a:hover {
+    color: #ffffff !important;
+}
+.btn.btn-primary {
+    border-color: var(--accent-color) !important;
+    background: var(--accent-color) !important;
+}
+.btn.btn-primary:active, .btn.btn-primary:focus, .btn.btn-primary:hover {
+    background: var(--accent-color-hover) !important;
+    border-color: var(--accent-color-hover) !important;
+}
+.btn.btn-ghost {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+}
+.btn.btn-ghost:hover {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-color) !important;
+    color: #000000 !important;
+}
+.probootstrap-panel .panel .panel-heading a[aria-expanded=true] {
+    color: var(--accent-color) !important;
+}
+.probootstrap-form .form-control:active, .probootstrap-form .form-control:focus {
+    border-color: var(--accent-color) !important;
+}
+.probootstrap-footer.probootstrap-bg a {
+    color: var(--accent-color) !important;
+}
+.probootstrap-footer form .btn.btn-subscribe {
+    background: var(--accent-color) !important;
+}
+.probootstrap-primary-color {
+    color: var(--accent-color) !important;
+}
+
+/* Custom CSS Overrides */
+.skill-percent {
+    color: var(--accent-color) !important;
+}
+.skill-progress-fill {
+    background: linear-gradient(90deg, var(--accent-color) 0%, var(--accent-color-hover) 100%) !important;
+}
+.tech-tag i {
+    color: var(--accent-color) !important;
+}
+.ai-chat-toggle {
+    border-color: rgba(var(--accent-color-rgb), 0.6) !important;
+    color: var(--accent-color) !important;
+}
+.ai-chat-toggle:hover {
+    border-color: var(--accent-color-hover) !important;
+    box-shadow: 0 12px 40px rgba(var(--accent-color-rgb), 0.3) !important;
+}
+.ai-chat-avatar {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-color-hover) 100%) !important;
+}
+.ai-chat-send {
+    background: var(--accent-color) !important;
+}
+.ai-chat-send:hover {
+    background: var(--accent-color-hover) !important;
+}
+.ai-chat-input:focus {
+    border-color: rgba(var(--accent-color-rgb), 0.5) !important;
+    box-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.15) !important;
+}
+.timeline-line {
+    background: rgba(var(--accent-color-rgb), 0.25) !important;
+}
+.timeline-dot {
+    background: var(--accent-color) !important;
+    box-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.8) !important;
+}
+.timeline-item:hover .timeline-dot {
+    background: var(--accent-color-hover) !important;
+    box-shadow: 0 0 14px rgba(var(--accent-color-rgb), 1) !important;
+}
+.timeline-content:hover {
+    border-color: rgba(var(--accent-color-rgb), 0.35) !important;
+}
+.timeline-date {
+    color: var(--accent-color) !important;
+    background: rgba(var(--accent-color-rgb), 0.12) !important;
+    border: 1px solid rgba(var(--accent-color-rgb), 0.25) !important;
+}
+.timeline-location a {
+    color: var(--accent-color) !important;
+}
+.timeline-location a:hover {
+    color: var(--accent-color-hover) !important;
+}
+.hobby-card:hover {
+    background: rgba(var(--accent-color-rgb), 0.08) !important;
+    border-color: rgba(var(--accent-color-rgb), 0.4) !important;
+}
+.hobby-card i {
+    color: var(--accent-color) !important;
+}
+.btn-cool-cv {
+    background: rgba(var(--accent-color-rgb), 0.10) !important;
+    border: 2px solid var(--accent-color) !important;
+    box-shadow: 0 4px 15px rgba(var(--accent-color-rgb), 0.25) !important;
+}
+.btn-cool-cv:hover {
+    background: var(--accent-color) !important;
+    box-shadow: 0 8px 25px rgba(var(--accent-color-rgb), 0.5) !important;
+}
+.about-skills-btn {
+    border-color: var(--accent-color) !important;
+    color: var(--accent-color) !important;
+}
+.about-skills-btn:hover {
+    background: var(--accent-color) !important;
+}
+
+/* Command Palette overrides */
+.cmd-badge {
+    border-color: rgba(var(--accent-color-rgb), 0.3) !important;
+    color: var(--accent-color) !important;
+}
+.cmd-item-shortcut kbd {
+    color: var(--accent-color) !important;
+}
+.cmd-item-icon {
+    color: var(--accent-color) !important;
+    border-color: rgba(var(--accent-color-rgb), 0.2) !important;
+}
+.cmd-item.active .cmd-item-icon {
+    background: rgba(var(--accent-color-rgb), 0.15) !important;
+    border-color: var(--accent-color) !important;
+}
+.btn-cmd-palette {
+    border-color: rgba(var(--accent-color-rgb), 0.3) !important;
+}
+.btn-cmd-palette:hover {
+    border-color: var(--accent-color) !important;
+}
+
+/* Theme Switcher Dropdown Styles */
+.theme-switcher-container {
+    position: relative;
+    display: inline-block;
+}
+
+.theme-switcher-dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 170px;
+    background: rgba(24, 27, 30, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 11000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-switcher-dropdown.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.theme-dropdown-title {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8b949e;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.theme-colors-grid {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.theme-color-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    outline: none;
+}
+
+.theme-color-btn:hover {
+    transform: scale(1.15);
+}
+
+.theme-color-btn.active {
+    border-color: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
 
 .interest{
     margin-top:60px;
