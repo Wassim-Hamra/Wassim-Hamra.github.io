@@ -758,13 +758,11 @@ var initLoungeAudioPlayer = function() {
           <div class="island-left-info">
             <i class="icon-location2"></i>
             <span class="island-mini-title">
-              <span id="visitor-location-short">Detecting...</span> <span id="visitor-temp-short"></span> · <span id="visitor-time-short">--:--</span>
+              <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
             </span>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 11px; color: #8b949e; display: flex; align-items: center; gap: 4px;">
-              <i class="icon-music" style="color: #22eaaa; font-size: 11px;"></i> Jazz
-            </span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="island-brand-label">Dynamic Island</span>
             <div class="lounge-eq-bars">
               <span></span><span></span><span></span><span></span>
             </div>
@@ -778,6 +776,7 @@ var initLoungeAudioPlayer = function() {
               <i class="icon-location2"></i> <span id="expanded-location-text">Detecting...</span>
             </span>
             <span id="expanded-weather-badge" style="font-size:11px;"></span>
+            <span class="island-brand-label">Dynamic Island</span>
             <span class="island-time-badge">
               <i class="icon-clock2"></i> <span id="expanded-time-text">--:--</span>
             </span>
@@ -852,7 +851,6 @@ var initLoungeAudioPlayer = function() {
     $('#expanded-location-text').text(countryDisplay);
     if (weatherText) {
       $('#expanded-weather-badge').html('<span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
-      $('#visitor-temp-short').html('· <span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
     }
   };
 
@@ -923,42 +921,35 @@ var initLoungeAudioPlayer = function() {
   volumeSlider.val(defaultVol);
 
   var isPlaying = false;
-  var isUnloading = false;
+  var isTimeRestored = false;
 
-  // Prevent page teardown from overwriting sessionStorage with 0.000
-  $(window).on('beforeunload pagehide', function() {
-    isUnloading = true;
-  });
+  // Restore audio timestamp AFTER audio metadata is loaded into browser memory
+  var restoreAudioTime = function() {
+    if (isTimeRestored) return;
+    var savedTime = sessionStorage.getItem('loungeAudioTime');
+    if (savedTime) {
+      try {
+        var t = parseFloat(savedTime);
+        if (!isNaN(t) && t > 0) {
+          audio.currentTime = t;
+          isTimeRestored = true;
+        }
+      } catch (e) {}
+    }
+  };
 
-  // Track playback time continuously (ignore resets during page teardown)
+  audio.onloadedmetadata = restoreAudioTime;
+  audio.oncanplay = restoreAudioTime;
+
   audio.ontimeupdate = function() {
-    if (!isUnloading && audio.currentTime > 0.3) {
+    if (audio.currentTime > 0) {
       sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
     }
   };
 
-  var restoreAudioTime = function() {
-    var savedTimeStr = sessionStorage.getItem('loungeAudioTime');
-    if (savedTimeStr) {
-      var savedTime = parseFloat(savedTimeStr);
-      if (!isNaN(savedTime) && savedTime > 0.3) {
-        try {
-          if (Math.abs(audio.currentTime - savedTime) > 0.5) {
-            audio.currentTime = savedTime;
-          }
-        } catch (e) {}
-      }
-    }
-  };
-
-  // Restore timestamp as soon as audio metadata/buffer is ready
-  audio.addEventListener('loadedmetadata', restoreAudioTime);
-  audio.addEventListener('canplay', restoreAudioTime);
-
   var playAudio = function() {
     restoreAudioTime();
     audio.play().then(function() {
-      restoreAudioTime();
       isPlaying = true;
       widget.addClass('playing');
       cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
