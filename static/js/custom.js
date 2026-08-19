@@ -834,17 +834,16 @@ var initLoungeAudioPlayer = function() {
   updateVisitorTime();
   setInterval(updateVisitorTime, 1000);
 
-  // Fetch visitor IP geolocation with reliable fallbacks
+  // Fetch visitor IP geolocation with reliable fallbacks (Country only)
   var setLocationText = function(city, country) {
-    var shortLoc = city || 'Earth';
-    var fullLoc = (city || 'Earth') + (country ? ', ' + country : '');
-    $('#visitor-location-short').text(shortLoc);
-    $('#expanded-location-text').text(fullLoc);
+    var countryOnly = country || city || 'Earth';
+    $('#visitor-location-short').text(countryOnly);
+    $('#expanded-location-text').text(countryOnly);
   };
 
   var fetchVisitorLocation = function() {
     $.getJSON('https://ipapi.co/json/', function(data) {
-      if (data && data.city) {
+      if (data && (data.country_name || data.country)) {
         setLocationText(data.city, data.country_name || data.country);
       } else {
         fetchFallbackLocation();
@@ -854,13 +853,13 @@ var initLoungeAudioPlayer = function() {
 
   var fetchFallbackLocation = function() {
     $.getJSON('https://ipwho.is/', function(data) {
-      if (data && data.success && data.city) {
+      if (data && data.success && (data.country || data.city)) {
         setLocationText(data.city, data.country);
       } else {
-        setLocationText('Tunis', 'Tunisia');
+        setLocationText('', 'Tunisia');
       }
     }).fail(function() {
-      setLocationText('Tunis', 'Tunisia');
+      setLocationText('', 'Tunisia');
     });
   };
 
