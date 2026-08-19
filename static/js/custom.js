@@ -758,7 +758,7 @@ var initLoungeAudioPlayer = function() {
           <div class="island-left-info">
             <i class="icon-location2"></i>
             <span class="island-mini-title">
-              <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
+              <span id="visitor-location-short">Detecting...</span> <span id="visitor-temp-short"></span> · <span id="visitor-time-short">--:--</span>
             </span>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -852,6 +852,7 @@ var initLoungeAudioPlayer = function() {
     $('#expanded-location-text').text(countryDisplay);
     if (weatherText) {
       $('#expanded-weather-badge').html('<span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
+      $('#visitor-temp-short').html('· <span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
     }
   };
 
