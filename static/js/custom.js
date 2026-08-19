@@ -402,47 +402,45 @@ var initSkillBars = function() {
 var initAIChatbot = function() {
   // 1. Inject HTML
   var chatbotHtml = `
-    <div class="dynamic-island-container">
-      <div class="dynamic-island collapsed" id="dynamic-island">
-        <div class="di-collapsed-content">
-          <div class="di-status">
-            <span class="di-dot"></span>
-            <i class="icon-android"></i>
+    <div class="ai-chat-widget">
+      <div class="ai-chat-toggle" id="ai-chat-toggle" title="Ask Wassim's Assistant">
+        <i class="icon-bubbles"></i>
+      </div>
+      <div class="ai-chat-window" id="ai-chat-window">
+        <div class="ai-chat-header">
+          <div class="ai-chat-header-info">
+            <div class="ai-chat-avatar">💬</div>
+            <div class="ai-chat-title-group">
+              <span class="ai-chat-title">Wassim's Assistant</span>
+              <span class="ai-chat-subtitle"><span class="ai-chat-status-dot"></span> Online</span>
+            </div>
           </div>
-          <span>Wassim's Assistant</span>
+          <button class="ai-chat-close" id="ai-chat-close">&times;</button>
         </div>
-        <div class="di-expanded-content">
-          <div class="di-header">
-            <div class="di-header-info">
-              <span class="di-header-avatar">🤖</span>
-              <span class="di-header-title">Wassim's Assistant</span>
-            </div>
-            <button class="di-close" id="di-close">&times;</button>
+        <div class="ai-chat-body" id="ai-chat-body">
+          <div class="ai-chat-message assistant">
+            Hi! I'm Wassim's assistant. Ask me anything about my projects, internships, or hobbies!
           </div>
-          <div class="di-body" id="di-body">
-            <div class="di-msg assistant">
-              Hi! I'm Wassim's assistant. Ask me anything about my projects, internships, or hobbies!
-            </div>
-            <div class="di-suggestions" id="di-suggestions">
-              <!-- Populated dynamically (3 at a time) -->
-            </div>
+          <div class="ai-chat-suggestions" id="ai-chat-suggestions">
+            <!-- Populated dynamically (3 at a time) -->
           </div>
-          <div class="di-footer">
-            <input type="text" class="di-input" id="di-input" placeholder="Type a message..." autocomplete="off">
-            <button class="di-send" id="di-send"><i class="icon-paper-plane"></i></button>
-          </div>
+        </div>
+        <div class="ai-chat-footer">
+          <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Type a message..." autocomplete="off">
+          <button class="ai-chat-send" id="ai-chat-send"><i class="icon-paper-plane"></i></button>
         </div>
       </div>
     </div>
   `;
   $('body').append(chatbotHtml);
 
-  var diContainer = $('#dynamic-island');
-  var closeBtn = $('#di-close');
-  var sendBtn = $('#di-send');
-  var chatInput = $('#di-input');
-  var chatBody = $('#di-body');
-  var suggestions = $('#di-suggestions');
+  var toggleBtn = $('#ai-chat-toggle');
+  var chatWindow = $('#ai-chat-window');
+  var closeBtn = $('#ai-chat-close');
+  var sendBtn = $('#ai-chat-send');
+  var chatInput = $('#ai-chat-input');
+  var chatBody = $('#ai-chat-body');
+  var suggestions = $('#ai-chat-suggestions');
 
   // Pool of 10 human questions
   var questionsPool = [
@@ -526,7 +524,7 @@ var initAIChatbot = function() {
     var displayCount = Math.min(3, unasked.length);
     for (var i = 0; i < displayCount; i++) {
       var item = unasked[i];
-      var btn = $('<button class="di-suggestion"></button>')
+      var btn = $('<button class="ai-chat-suggestion"></button>')
         .attr('data-id', item.id)
         .attr('data-q', item.q)
         .text(item.label);
@@ -534,21 +532,19 @@ var initAIChatbot = function() {
     }
   };
 
-  // Toggle Window (Open)
-  diContainer.on('click', function() {
-    if (diContainer.hasClass('collapsed')) {
-      diContainer.removeClass('collapsed').addClass('expanded');
-      setTimeout(function() {
-        chatInput.focus();
-        scrollToBottom();
-      }, 300); // Wait for transition to complete
+  // Toggle Window
+  toggleBtn.on('click', function() {
+    chatWindow.toggleClass('open');
+    toggleBtn.toggleClass('active');
+    if (chatWindow.hasClass('open')) {
+      chatInput.focus();
+      scrollToBottom();
     }
   });
 
-  // Close Window (Close)
-  closeBtn.on('click', function(e) {
-    e.stopPropagation(); // Prevent re-expanding
-    diContainer.removeClass('expanded').addClass('collapsed');
+  closeBtn.on('click', function() {
+    chatWindow.removeClass('open');
+    toggleBtn.removeClass('active');
   });
 
   // Scroll function
@@ -657,7 +653,7 @@ var initAIChatbot = function() {
     if (!text || text.trim() === '') return;
     
     // Add user message
-    var userMsgHtml = `<div class="di-msg user">${text}</div>`;
+    var userMsgHtml = `<div class="ai-chat-message user">${text}</div>`;
     if (suggestions.parent().length > 0) {
       suggestions.before(userMsgHtml);
     } else {
@@ -670,7 +666,7 @@ var initAIChatbot = function() {
 
     // Add typing indicator
     var typingHtml = `
-      <div class="di-typing" id="di-typing">
+      <div class="ai-chat-typing" id="ai-chat-typing">
         <span></span>
         <span></span>
         <span></span>
@@ -680,16 +676,16 @@ var initAIChatbot = function() {
     scrollToBottom();
 
     setTimeout(function() {
-      $('#di-typing').remove();
+      $('#ai-chat-typing').remove();
       var answer = getResponse(text);
-      var assistantMsgHtml = `<div class="di-msg assistant">${answer}</div>`;
+      var assistantMsgHtml = `<div class="ai-chat-message assistant">${answer}</div>`;
       chatBody.append(assistantMsgHtml);
       
       // Refresh suggestions
       renderSuggestions();
       
       if (askedQuestionIds.length === 10) {
-        var finalMsg = `<div class="di-msg assistant" style="font-style: italic; opacity: 0.85;">I suppose you don't have any more questions! If you do, feel free to contact the real Wassim on the <a href="contact.html" style="color:#22eaaa;text-decoration:underline;">contact page</a>.</div>`;
+        var finalMsg = `<div class="ai-chat-message assistant" style="font-style: italic; opacity: 0.85;">I suppose you don't have any more questions! If you do, feel free to contact the real Wassim on the <a href="contact.html" style="color:#22eaaa;text-decoration:underline;">contact page</a>.</div>`;
         chatBody.append(finalMsg);
       } else {
         chatBody.append(suggestions);
@@ -699,7 +695,7 @@ var initAIChatbot = function() {
   };
 
   // Bind click on suggestions
-  chatBody.on('click', '.di-suggestion', function() {
+  chatBody.on('click', '.ai-chat-suggestion', function() {
     var text = $(this).attr('data-q');
     var id = parseInt($(this).attr('data-id'));
     if (id && askedQuestionIds.indexOf(id) === -1) {
