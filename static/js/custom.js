@@ -403,29 +403,26 @@ var initAIChatbot = function() {
   // 1. Inject HTML
   var chatbotHtml = `
     <div class="ai-chat-widget">
-      <div class="ai-chat-toggle" id="ai-chat-toggle" title="Ask Wassim's AI">
-        <i class="icon-chat"></i>
+      <div class="ai-chat-toggle" id="ai-chat-toggle" title="Ask Wassim's Assistant">
+        <i class="icon-android"></i>
       </div>
       <div class="ai-chat-window" id="ai-chat-window">
         <div class="ai-chat-header">
           <div class="ai-chat-header-info">
-            <div class="ai-chat-avatar">AI</div>
+            <div class="ai-chat-avatar">🤖</div>
             <div class="ai-chat-title-group">
-              <span class="ai-chat-title">Ask Wassim AI</span>
-              <span class="ai-chat-subtitle"><span class="ai-chat-status-dot"></span> Active</span>
+              <span class="ai-chat-title">Wassim's Assistant</span>
+              <span class="ai-chat-subtitle"><span class="ai-chat-status-dot"></span> Online</span>
             </div>
           </div>
           <button class="ai-chat-close" id="ai-chat-close">&times;</button>
         </div>
         <div class="ai-chat-body" id="ai-chat-body">
           <div class="ai-chat-message assistant">
-            Hi! I'm Wassim's AI assistant. Ask me anything about my projects, internships, or hobbies!
+            Hi! I'm Wassim's assistant. Ask me anything about my projects, internships, or hobbies!
           </div>
           <div class="ai-chat-suggestions" id="ai-chat-suggestions">
-            <button class="ai-chat-suggestion" data-q="What did you build during your Hexabyte internship?">What did you do at Hexabyte?</button>
-            <button class="ai-chat-suggestion" data-q="Which projects of yours are you most proud of?">Which projects are you proudest of?</button>
-            <button class="ai-chat-suggestion" data-q="Are you more of an AI engineer or systems programmer?">AI engineer or systems programmer?</button>
-            <button class="ai-chat-suggestion" data-q="What sports teams do you cheer for?">What sports teams do you cheer for?</button>
+            <!-- Populated dynamically (3 at a time) -->
           </div>
         </div>
         <div class="ai-chat-footer">
@@ -444,6 +441,96 @@ var initAIChatbot = function() {
   var chatInput = $('#ai-chat-input');
   var chatBody = $('#ai-chat-body');
   var suggestions = $('#ai-chat-suggestions');
+
+  // Pool of 10 human questions
+  var questionsPool = [
+    {
+      id: 1,
+      label: "What got you into Generative AI?",
+      q: "What got you into Generative AI and AI Agents?",
+      a: "I've always loved automation, but when LLMs emerged, I realized we could build systems that don't just follow rules, but actually think and reason. Building tools like my translation pipeline or experimenting with LangChain and LangGraph made me realize that AI agents are the future of software."
+    },
+    {
+      id: 2,
+      label: "What did you do at Hexabyte?",
+      q: "I saw you interned at Hexabyte. What was the churn prediction project about?",
+      a: "At Hexabyte, I built a machine learning pipeline using PyTorch to predict customer churn based on subscription patterns. I also built interactive Tableau dashboards for executives and automated database updates to streamline client lifecycle management."
+    },
+    {
+      id: 3,
+      label: "Why build a Rust shell?",
+      q: "Why did you build a command shell from scratch in Rust?",
+      a: "I wanted to understand how operating systems manage processes under the hood, and Rust's safety and performance made it the perfect tool. It was challenging to manage piping, I/O redirection, and signal handling, but it was incredibly rewarding!"
+    },
+    {
+      id: 4,
+      label: "What are you studying?",
+      q: "What are you currently studying at FST?",
+      a: "I'm in my final year of Computer Engineering at FST (Faculty of Sciences of Tunis), focusing on software engineering, deep learning, algorithms, and system architecture."
+    },
+    {
+      id: 5,
+      label: "Are you open to job offers?",
+      q: "Are you looking for full-time opportunities or internships?",
+      a: "Yes! I'm actively looking for Software Engineering and GenAI/ML positions where I can build impactful AI agents, tools, and scalable systems. You can view my contact details on the contact page if you'd like to chat!"
+    },
+    {
+      id: 6,
+      label: "Where can I get your resume?",
+      q: "How do I download your resume/CV?",
+      a: "You can download my CV directly from the About page using the 'Download CV' button, or get it via this direct link: <a href='https://drive.google.com/file/d/1e0lka_gm1ceTEtnZUaYaJGYqBprR7BHV/view?usp=sharing' target='_blank' style='color:#22eaaa;text-decoration:underline;'>Download CV</a>!"
+    },
+    {
+      id: 7,
+      label: "Who is your favorite F1 driver?",
+      q: "I see you're an F1 fan. Who is your favorite driver?",
+      a: "I'm a huge Scuderia Ferrari fan! Right now, I'm cheering on Charles Leclerc and Lewis Hamilton. Forza Ferrari always! 🏎️"
+    },
+    {
+      id: 8,
+      label: "What's your favorite tech stack?",
+      q: "What is your favorite tech stack to build with?",
+      a: "For AI and ML, I'm all about PyTorch, LangChain, and LangGraph. For web development, my go-to is TypeScript, Next.js, and FastAPI or Django. And for systems, I love Rust!"
+    },
+    {
+      id: 9,
+      label: "What did you do at SIMAC?",
+      q: "What was your tax reporting project at SIMAC?",
+      a: "During my internship at SIMAC, I built an ERP automated tax reporting module using PL/SQL and Delphi. It helped automate tax calculations and reporting and was adopted by 7 companies across Tunisia and Central Africa."
+    },
+    {
+      id: 10,
+      label: "What is the pathfinder project?",
+      q: "Where did you build the pathfinder visualizer?",
+      a: "I built PathFinder to visualize algorithms like Dijkstra's, A*, and BFS/DFS. It's a web tool that shows how search algorithms traverse grids to find the shortest path, making complex CS concepts visual and easy to learn."
+    }
+  ];
+
+  var askedQuestionIds = [];
+
+  var renderSuggestions = function() {
+    suggestions.empty();
+    
+    // Filter out already asked questions
+    var unasked = questionsPool.filter(function(item) {
+      return askedQuestionIds.indexOf(item.id) === -1;
+    });
+
+    if (unasked.length === 0) {
+      return;
+    }
+
+    // Display only up to 3 at once
+    var displayCount = Math.min(3, unasked.length);
+    for (var i = 0; i < displayCount; i++) {
+      var item = unasked[i];
+      var btn = $('<button class="ai-chat-suggestion"></button>')
+        .attr('data-id', item.id)
+        .attr('data-q', item.q)
+        .text(item.label);
+      suggestions.append(btn);
+    }
+  };
 
   // Toggle Window
   toggleBtn.on('click', function() {
@@ -465,27 +552,100 @@ var initAIChatbot = function() {
     chatBody.scrollTop(chatBody[0].scrollHeight);
   };
 
+  // Generic Q&A lookup
+  var getGenericResponse = function(query) {
+    var q = query.toLowerCase().trim();
+    
+    if (q === 'hello' || q === 'hi' || q === 'hey' || q === 'yo' || q.startsWith('hi ')) {
+      return "Hi there! How can I help you today?";
+    }
+    if (q === 'bye' || q === 'goodbye' || q === 'cya' || q === 'quit' || q === 'exit') {
+      return "Goodbye! Have a great day!";
+    }
+    if (q.includes('who are you') || q.includes('your name') || q.includes('what are you')) {
+      return "I'm Wassim's digital assistant. I'm here to answer questions about his skills, projects, and work experience!";
+    }
+    if (q.includes('how are you') || q.includes('how is it going') || q.includes('how\'s it going') || q.includes('whats up')) {
+      return "I'm doing great, thank you! Ready to answer any questions you have about Wassim.";
+    }
+    if (q === 'thank you' || q === 'thanks' || q === 'ty' || q.includes('thank you')) {
+      return "You're very welcome!";
+    }
+    if (q === 'awesome' || q === 'cool' || q === 'great' || q === 'nice' || q === 'perfect') {
+      return "Glad you think so! Let me know if there's anything else you'd like to ask.";
+    }
+    if (q.includes('where do you live') || q.includes('location') || q.includes('where are you') || q.includes('live') || q.includes('tunis') || q.includes('tunisia')) {
+      return "Wassim is based in Tunis, Tunisia.";
+    }
+    if (q.includes('linkedin')) {
+      return "You can connect with Wassim on <a href='https://www.linkedin.com/in/medwassimhamra/' target='_blank' style='color:#22eaaa;text-decoration:underline;'>LinkedIn</a>.";
+    }
+    if (q.includes('github')) {
+      return "Check out Wassim's repositories on <a href='https://github.com/Wassim-Hamra' target='_blank' style='color:#22eaaa;text-decoration:underline;'>GitHub</a>.";
+    }
+    if (q.includes('email') || q.includes('contact') || q.includes('phone') || q.includes('message') || q.includes('reach')) {
+      return "You can email Wassim at <strong>wassimhamraa@gmail.com</strong>, call him at <strong>+216 98 786 241</strong>, or use the <a href='contact.html' style='color:#22eaaa;text-decoration:underline;'>Contact page</a>.";
+    }
+    if (q.includes('age') || q.includes('how old') || q.includes('birthday')) {
+      return "Wassim is a final-year university student, around 22 years old.";
+    }
+    if (q.includes('school') || q.includes('university') || q.includes('college') || q.includes('fst') || q.includes('studying')) {
+      return "Wassim is studying Computer Engineering at the Faculty of Sciences of Tunis (FST).";
+    }
+    if (q.includes('python')) {
+      return "Python is Wassim's primary language. He uses it for Machine Learning, Generative AI (LangChain, PyTorch), and backend APIs (FastAPI, Django).";
+    }
+    if (q.includes('rust')) {
+      return "Wassim loves Rust! He used it to build a custom command shell from scratch in Rust to explore low-level systems programming.";
+    }
+    if (q.includes('pytorch')) {
+      return "Wassim has deep experience with PyTorch, having built custom Transformers, Sentiment Analysis RNNs, and churn prediction models.";
+    }
+    if (q.includes('agent') || q.includes('rag') || q.includes('llm') || q.includes('genai') || q.includes('generative ai')) {
+      return "Wassim is passionate about GenAI and AI Agents, building pipelines using LangChain, LangGraph, OpenAI, and vector databases.";
+    }
+    if (q.includes('resume') || q.includes('cv') || q.includes('download')) {
+      return "You can download Wassim's CV <a href='https://drive.google.com/file/d/1e0lka_gm1ceTEtnZUaYaJGYqBprR7BHV/view?usp=sharing' target='_blank' style='color:#22eaaa;text-decoration:underline;'>here</a>!";
+    }
+    if (q.includes('help') || q.includes('what can you do') || q.includes('features')) {
+      return "I can answer questions about Wassim's education, projects (like his Rust shell or RAG chatbot), internships (Hexabyte, SIMAC), and hobbies.";
+    }
+    if (q.includes('club africain') || q.includes('football') || q.includes('soccer')) {
+      return "Wassim is a big supporter of Club Africain! 🔴⚪ White and red forever.";
+    }
+    if (q.includes('ferrari') || q.includes('f1') || q.includes('formula 1') || q.includes('leclerc')) {
+      return "Wassim is a huge Scuderia Ferrari F1 fan. Forza Ferrari always! 🏎️";
+    }
+    return null;
+  };
+
   // Predefined Q&A mapping
   var getResponse = function(query) {
-    var q = query.toLowerCase();
+    var q = query.toLowerCase().trim();
     
-    if (q.includes('hexabyte')) {
-      return "At Hexabyte, I built a PyTorch churn-prediction model to identify at-risk customers, created executive Tableau dashboards, and automated database/subscription updates using custom Python scripts.";
+    // Check human questions pool
+    var matchedItem = null;
+    for (var i = 0; i < questionsPool.length; i++) {
+      var item = questionsPool[i];
+      if (q.includes(item.label.toLowerCase()) || item.q.toLowerCase().includes(q) || q.includes(item.q.toLowerCase().substring(0, 15))) {
+        matchedItem = item;
+        break;
+      }
     }
-    if (q.includes('proud') || q.includes('project') || q.includes('best') || q.includes('proudest')) {
-      return "I'm really proud of my <strong>Video-Transcription-Translation-AI-System</strong> and my from-scratch <strong>Transformer_PyTorch</strong> implementation. Building a Transformer from scratch solidified my ML foundation, while the translation tool is a practical AI pipeline with real-world utility!";
+
+    if (matchedItem) {
+      if (askedQuestionIds.indexOf(matchedItem.id) === -1) {
+        askedQuestionIds.push(matchedItem.id);
+      }
+      return matchedItem.a;
     }
-    if (q.includes('system') || q.includes('low') || q.includes('programmer') || q.includes('engineer') || q.includes('rust') || q.includes('c++')) {
-      return "I love both! My primary focus is on AI agents, LLMs, and RAG architectures (using PyTorch, LangChain, and LangGraph), but I also love systems level programming—I've built a custom command shell in Rust and worked with C++.";
-    }
-    if (q.includes('sport') || q.includes('f1') || q.includes('ferrari') || q.includes('football') || q.includes('club') || q.includes('africain')) {
-      return "I'm a massive fan of the Scuderia Ferrari F1 Team (Forza Ferrari! 🏎️) and a dedicated supporter of Club Africain in football/soccer! 🔴⚪";
-    }
-    if (q.includes('hello') || q.includes('hi') || q.includes('hey')) {
-      return "Hello! How can I help you today? Feel free to ask about my projects, internships, or interests!";
-    }
-    
-    return "That's a great question! I'm still learning, but you can explore my <a href='projects.html' style='color:#22eaaa;text-decoration:underline;'>Projects</a>, read more <a href='about.html' style='color:#22eaaa;text-decoration:underline;'>About me</a>, or reach out to me directly on the <a href='contact.html' style='color:#22eaaa;text-decoration:underline;'>Contact page</a>!";
+
+    // Check generic fallbacks
+    var generic = getGenericResponse(query);
+    if (generic) return generic;
+
+    // Default unmatched query fallback
+    return "Well, I don't know the answer to that, but you can ask the real Wassim on the <a href='contact.html' style='color:#22eaaa;text-decoration:underline;'>contact page</a>!";
   };
 
   // Send Message Logic
@@ -494,7 +654,6 @@ var initAIChatbot = function() {
     
     // Add user message
     var userMsgHtml = `<div class="ai-chat-message user">${text}</div>`;
-    // Insert before suggestions (or append if suggestions are detached)
     if (suggestions.parent().length > 0) {
       suggestions.before(userMsgHtml);
     } else {
@@ -522,8 +681,15 @@ var initAIChatbot = function() {
       var assistantMsgHtml = `<div class="ai-chat-message assistant">${answer}</div>`;
       chatBody.append(assistantMsgHtml);
       
-      // Re-attach suggestions at the end
-      chatBody.append(suggestions);
+      // Refresh suggestions
+      renderSuggestions();
+      
+      if (askedQuestionIds.length === 10) {
+        var finalMsg = `<div class="ai-chat-message assistant" style="font-style: italic; opacity: 0.85;">I suppose you don't have any more questions! If you do, feel free to contact the real Wassim on the <a href="contact.html" style="color:#22eaaa;text-decoration:underline;">contact page</a>.</div>`;
+        chatBody.append(finalMsg);
+      } else {
+        chatBody.append(suggestions);
+      }
       scrollToBottom();
     }, 1000);
   };
@@ -531,6 +697,10 @@ var initAIChatbot = function() {
   // Bind click on suggestions
   chatBody.on('click', '.ai-chat-suggestion', function() {
     var text = $(this).attr('data-q');
+    var id = parseInt($(this).attr('data-id'));
+    if (id && askedQuestionIds.indexOf(id) === -1) {
+      askedQuestionIds.push(id);
+    }
     handleSend(text);
   });
 
@@ -549,6 +719,9 @@ var initAIChatbot = function() {
       handleSend(text);
     }
   });
+
+  // Initial suggestions render
+  renderSuggestions();
 };
 
 });
