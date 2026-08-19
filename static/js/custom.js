@@ -16,8 +16,9 @@ var flexSlider = function() {
 };
 $(document).ready(function() {
   flexSlider(); // Ensure this is called after DOM is loaded
-  fetchGitHubRepos(); // Load GitHub repositories
+  fetchGitHubRepos(); // Load GitHub repositories dynamically
   initContactForm(); // Initialize AJAX contact form
+  initCommandPalette(); // Initialize Command Palette (Ctrl+K)
 });
 
 var fetchGitHubRepos = function() {
@@ -201,5 +202,191 @@ var initContactForm = function() {
   });
 };
 
+var initCommandPalette = function() {
+  var modalHtml = `
+    <div class="cmd-palette-overlay" id="cmd-palette-overlay">
+      <div class="cmd-palette-modal">
+        <div class="cmd-header">
+          <i class="icon-search"></i>
+          <input type="text" id="cmd-input" class="cmd-input" placeholder="Type a command or search projects..." autocomplete="off">
+          <span class="cmd-badge">ESC to close</span>
+        </div>
+        <div class="cmd-results" id="cmd-results"></div>
+        <div class="cmd-footer">
+          <div>Spotlight Command Palette</div>
+          <div class="cmd-footer-keys">
+            <span class="cmd-footer-key"><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
+            <span class="cmd-footer-key"><kbd>↵</kbd> Select</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  $('body').append(modalHtml);
+
+  var overlay = $('#cmd-palette-overlay');
+  var input = $('#cmd-input');
+  var resultsContainer = $('#cmd-results');
+  var isOpen = false;
+  var selectedIndex = 0;
+
+  var items = [
+    // Navigation
+    { title: "Home Page", category: "Navigation", icon: "icon-home", action: function() { window.location.href = "index.html"; } },
+    { title: "Projects Grid", category: "Navigation", icon: "icon-briefcase", action: function() { window.location.href = "projects.html"; } },
+    { title: "About Wassim", category: "Navigation", icon: "icon-user", action: function() { window.location.href = "about.html"; } },
+    { title: "Contact Form", category: "Navigation", icon: "icon-mail", action: function() { window.location.href = "contact.html"; } },
+
+    // Featured Projects
+    { title: "Transformer PyTorch", category: "Project", icon: "icon-code", action: function() { window.open("https://github.com/Wassim-Hamra/Transformer_PyTorch", "_blank"); } },
+    { title: "PathFinder Route Explorer", category: "Project", icon: "icon-compass", action: function() { window.open("https://github.com/Wassim-Hamra/PathFinder", "_blank"); } },
+    { title: "Rust Command Shell", category: "Project", icon: "icon-terminal", action: function() { window.open("https://github.com/Wassim-Hamra/Rust-Command-Shell", "_blank"); } },
+    { title: "Video AI Transcription & Translation", category: "Project", icon: "icon-video", action: function() { window.open("https://github.com/Wassim-Hamra/Video-Transcription-Translation-AI-System", "_blank"); } },
+    { title: "Deepkit Machine Learning Library", category: "Project", icon: "icon-layers", action: function() { window.open("https://github.com/Wassim-Hamra/Deepkit", "_blank"); } },
+    { title: "Sentiment Analysis RNN", category: "Project", icon: "icon-pie-chart", action: function() { window.open("https://github.com/Wassim-Hamra/Sentiment-Analysis-RNN", "_blank"); } },
+    { title: "PDF Question Answering RAG Chatbot", category: "Project", icon: "icon-document", action: function() { window.open("https://github.com/Wassim-Hamra/PDF-Question-Answering-Chatbot-using-RAG", "_blank"); } },
+    { title: "Obstacle Avoidance Robot", category: "Project", icon: "icon-cog", action: function() { window.open("https://github.com/Wassim-Hamra/Obstacle_avoidance_robot", "_blank"); } },
+    { title: "Next Word Prediction LSTM", category: "Project", icon: "icon-font", action: function() { window.open("https://github.com/Wassim-Hamra/Next-Word-Prediction-LSTM", "_blank"); } },
+    { title: "Health Center Web App", category: "Project", icon: "icon-heart", action: function() { window.location.href = "under_development.html"; } },
+
+    // Actions & Socials
+    { title: "Copy Email Address (wassimhamraa@gmail.com)", category: "Action", icon: "icon-copy", action: function() { 
+        navigator.clipboard.writeText("wassimhamraa@gmail.com"); 
+        alert("Copied wassimhamraa@gmail.com to clipboard!");
+      } 
+    },
+    { title: "Open LinkedIn Profile", category: "Social", icon: "icon-linkedin", action: function() { window.open("https://www.linkedin.com/in/medwassimhamra/", "_blank"); } },
+    { title: "Open GitHub Profile", category: "Social", icon: "icon-github2", action: function() { window.open("https://github.com/Wassim-Hamra?tab=repositories", "_blank"); } }
+  ];
+
+  var renderItems = function(filterText) {
+    resultsContainer.empty();
+    var query = (filterText || "").toLowerCase().trim();
+
+    var filtered = items.filter(function(item) {
+      return item.title.toLowerCase().indexOf(query) !== -1 || item.category.toLowerCase().indexOf(query) !== -1;
+    });
+
+    if (filtered.length === 0) {
+      resultsContainer.html('<div style="padding: 20px; text-align: center; color: #8b949e;">No matching commands found.</div>');
+      resultsContainer.data('count', 0);
+      return;
+    }
+
+    var groups = {};
+    filtered.forEach(function(item, idx) {
+      if (!groups[item.category]) groups[item.category] = [];
+      groups[item.category].push({ item: item, originalIndex: idx });
+    });
+
+    var currentGlobalIndex = 0;
+    Object.keys(groups).forEach(function(cat) {
+      resultsContainer.append('<div class="cmd-group-heading">' + cat + '</div>');
+      groups[cat].forEach(function(entry) {
+        var isSelected = (currentGlobalIndex === selectedIndex);
+        var activeClass = isSelected ? ' active' : '';
+        var itemHtml = `
+          <div class="cmd-item${activeClass}" data-index="${currentGlobalIndex}">
+            <div class="cmd-item-left">
+              <div class="cmd-item-icon"><i class="${entry.item.icon}"></i></div>
+              <div class="cmd-item-info">
+                <div class="cmd-item-title">${entry.item.title}</div>
+                <div class="cmd-item-category">${entry.item.category}</div>
+              </div>
+            </div>
+            <div class="cmd-item-shortcut">↵ Jump</div>
+          </div>
+        `;
+        resultsContainer.append(itemHtml);
+        currentGlobalIndex++;
+      });
+    });
+
+    resultsContainer.data('count', currentGlobalIndex);
+  };
+
+  var openModal = function() {
+    overlay.addClass('active');
+    isOpen = true;
+    selectedIndex = 0;
+    input.val('');
+    renderItems('');
+    setTimeout(function() { input.focus(); }, 50);
+  };
+
+  var closeModal = function() {
+    overlay.removeClass('active');
+    isOpen = false;
+    input.blur();
+  };
+
+  $(document).on('click', '#cmd-palette-btn', function(e) {
+    e.preventDefault();
+    if (isOpen) closeModal(); else openModal();
+  });
+
+  overlay.on('click', function(e) {
+    if ($(e.target).hasClass('cmd-palette-overlay')) closeModal();
+  });
+
+  $(document).on('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (isOpen) closeModal(); else openModal();
+    } else if (e.key === 'Escape' && isOpen) {
+      closeModal();
+    }
+  });
+
+  input.on('input', function() {
+    selectedIndex = 0;
+    renderItems($(this).val());
+  });
+
+  input.on('keydown', function(e) {
+    var count = resultsContainer.data('count') || 0;
+    if (count === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex + 1) % count;
+      updateActiveItem();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex - 1 + count) % count;
+      updateActiveItem();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      executeActiveItem();
+    }
+  });
+
+  var updateActiveItem = function() {
+    resultsContainer.find('.cmd-item').removeClass('active');
+    var activeEl = resultsContainer.find('.cmd-item[data-index="' + selectedIndex + '"]');
+    activeEl.addClass('active');
+    if (activeEl.length > 0) {
+      activeEl[0].scrollIntoView({ block: 'nearest' });
+    }
+  };
+
+  var executeActiveItem = function() {
+    var query = input.val().toLowerCase().trim();
+    var filtered = items.filter(function(item) {
+      return item.title.toLowerCase().indexOf(query) !== -1 || item.category.toLowerCase().indexOf(query) !== -1;
+    });
+
+    if (filtered[selectedIndex]) {
+      closeModal();
+      filtered[selectedIndex].action();
+    }
+  };
+
+  resultsContainer.on('click', '.cmd-item', function() {
+    var index = $(this).data('index');
+    selectedIndex = index;
+    executeActiveItem();
+  });
+};
 
 });
