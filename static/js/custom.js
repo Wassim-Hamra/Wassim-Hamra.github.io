@@ -761,8 +761,13 @@ var initLoungeAudioPlayer = function() {
               <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
             </span>
           </div>
-          <div class="lounge-eq-bars">
-            <span></span><span></span><span></span><span></span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 11px; color: #8b949e; display: flex; align-items: center; gap: 4px;">
+              <i class="icon-music" style="color: #22eaaa; font-size: 11px;"></i> Jazz
+            </span>
+            <div class="lounge-eq-bars">
+              <span></span><span></span><span></span><span></span>
+            </div>
           </div>
         </div>
 
