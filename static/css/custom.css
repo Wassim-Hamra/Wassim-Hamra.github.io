@@ -9,33 +9,52 @@
 }
 
 /* ==========================================================================
-   Spotlight Command Palette (True High-Visibility Glassmorphism)
+   Spotlight Command Palette (Ctrl+K) Styles
    ========================================================================== */
 
 .btn-cmd-palette {
-    display: inline-block !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-size: 16px;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px !important;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    color: #ffffff !important;
+    font-size: 12px;
+    font-weight: 500;
     transition: all 0.2s ease-in-out;
     text-decoration: none !important;
-    padding: 0 6px !important;
+    margin-left: 12px;
 }
 
 .btn-cmd-palette:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.4);
     color: #ffffff !important;
-    transform: scale(1.15);
+    transform: translateY(-1px);
 }
 
-/* Glassmorphism Overlay - Translucent Backdrop Blur */
+.btn-cmd-palette kbd {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Command Palette Overlay */
 .cmd-palette-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     z-index: 999999;
     display: flex;
     align-items: flex-start;
@@ -43,7 +62,7 @@
     padding-top: 100px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.2s ease;
     font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -52,19 +71,16 @@
     pointer-events: auto;
 }
 
-/* Frosted Glass Modal Container */
 .cmd-palette-modal {
-    background: rgba(25, 30, 36, 0.65) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    border-radius: 14px;
+    background: #181b1e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     width: 90%;
-    max-width: 600px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    max-width: 620px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
     overflow: hidden;
-    transform: translateY(-12px) scale(0.97);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(-10px) scale(0.97);
+    transition: transform 0.2s ease;
 }
 
 .cmd-palette-overlay.active .cmd-palette-modal {
@@ -75,15 +91,14 @@
     display: flex;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: #14171a;
 }
 
 .cmd-header i {
-    color: #ffffff;
+    color: #8b949e;
     font-size: 18px;
     margin-right: 12px;
-    opacity: 0.95;
 }
 
 .cmd-input {
@@ -98,12 +113,12 @@
 }
 
 .cmd-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: #6e7681;
 }
 
 .cmd-badge {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.1);
+    color: #8b949e;
     padding: 3px 8px;
     border-radius: 4px;
     font-size: 11px;
@@ -113,33 +128,33 @@
 }
 
 .cmd-results {
-    max-height: 340px;
+    max-height: 360px;
     overflow-y: auto;
-    padding: 8px 0;
+    padding: 10px 0;
 }
 
 .cmd-group-heading {
-    padding: 10px 20px 4px 20px;
+    padding: 8px 20px 4px 20px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: rgba(255, 255, 255, 0.55);
+    color: #8b949e;
 }
 
 .cmd-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 11px 20px;
-    color: rgba(255, 255, 255, 0.85);
+    padding: 10px 20px;
+    color: #c9d1d9;
     cursor: pointer;
     text-decoration: none !important;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .cmd-item:hover, .cmd-item.active {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
     color: #ffffff !important;
 }
 
@@ -153,17 +168,17 @@
     width: 32px;
     height: 32px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
+    color: #58a6ff;
     font-size: 15px;
     flex-shrink: 0;
 }
 
 .cmd-item.active .cmd-item-icon {
-    background: rgba(255, 255, 255, 0.3);
+    background: #238636;
     color: #ffffff;
 }
 
@@ -179,24 +194,24 @@
 }
 
 .cmd-item-category {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    color: #8b949e;
 }
 
 .cmd-item-shortcut {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.4);
+    color: #6e7681;
 }
 
 .cmd-footer {
     padding: 10px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    background: rgba(15, 18, 22, 0.4);
+    font-size: 12px;
+    color: #6e7681;
+    background: #111315;
 }
 
 .cmd-footer-keys {
@@ -211,8 +226,8 @@
 }
 
 .cmd-footer-key kbd {
-    background: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.1);
+    color: #8b949e;
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 10px;
