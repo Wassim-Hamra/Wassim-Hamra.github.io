@@ -32,7 +32,8 @@ var fetchGitHubRepos = function() {
       "Sentiment-Analysis-RNN",
       "Churn-Classification-ANN",
       "Obstacle_avoidance_robot",
-      "Next-Word-Prediction-LSTM"
+      "Next-Word-Prediction-LSTM",
+      "PDF-Question-Answering-Chatbot-using-RAG"
   ];
 
   var repoImages = {
@@ -45,13 +46,37 @@ var fetchGitHubRepos = function() {
       "Sentiment-Analysis-RNN": "static/rnn.webp",
       "Churn-Classification-ANN": "static/ann.jpg",
       "Obstacle_avoidance_robot": "static/turtlebot.jpg",
-      "Next-Word-Prediction-LSTM": "static/lstm.png"
+      "Next-Word-Prediction-LSTM": "static/lstm.png",
+      "PDF-Question-Answering-Chatbot-using-RAG": "search.png"
   };
 
   var repoStyles = {
       "Deepkit": "aspect-ratio: 16/9; object-fit: contain; background: #000000; padding: 20px;",
       "DeepKit": "aspect-ratio: 16/9; object-fit: contain; background: #000000; padding: 20px;"
   };
+
+  var customStaticCards = [
+      {
+          name: "Health Center",
+          category: "Predictive Modeling | Web Development",
+          description: "A web application that uses predictive models to evaluate the risk for various diseases. Users input their health information, and they get personalized risk assessments and lifestyle recommendations to improve their health.",
+          url: "under_development.html",
+          linkText: "View details",
+          img: "static/img/healthcenter.png",
+          imgStyle: "aspect-ratio: 16/9; object-fit: cover;",
+          isInternal: true
+      },
+      {
+          name: "This Website",
+          category: "Web Development",
+          description: "A personal portfolio website showcasing my professional experience, skills, and personal projects, giving you insight into my journey and the work I’m passionate about.",
+          url: "project_website.html",
+          linkText: "View details",
+          img: "static/img/screenshot.png",
+          imgStyle: "aspect-ratio: 16/9; object-fit: cover;",
+          isInternal: true
+      }
+  ];
 
   Promise.all(reposToFetch.map(repoName => 
       fetch(`https://api.github.com/repos/Wassim-Hamra/${repoName}`)
@@ -60,33 +85,54 @@ var fetchGitHubRepos = function() {
   ))
   .then(results => {
       container.empty();
+      
+      var allCards = [];
       var validRepos = results.filter(r => r !== null);
-      if (validRepos.length > 0) {
-          validRepos.forEach((repo) => {
-              var description = repo.description || "No description provided.";
-              var language = repo.language || "Markdown";
-              
-              if (description.length > 100) {
-                  description = description.substring(0, 97) + "...";
-              }
-              
-              var key = Object.keys(repoImages).find(k => k.toLowerCase() === repo.name.toLowerCase());
-              var img = key ? repoImages[key] : "static/img/slider1.jpg";
-              
-              var styleKey = Object.keys(repoStyles).find(k => k.toLowerCase() === repo.name.toLowerCase());
-              var imgStyle = styleKey ? repoStyles[styleKey] : "aspect-ratio: 16/9; object-fit: cover;";
-              
+      validRepos.forEach((repo) => {
+          var description = repo.description || "No description provided.";
+          var language = repo.language || "Markdown";
+          
+          if (description.length > 100) {
+              description = description.substring(0, 97) + "...";
+          }
+          
+          var key = Object.keys(repoImages).find(k => k.toLowerCase() === repo.name.toLowerCase());
+          var img = key ? repoImages[key] : "search.png";
+          
+          var styleKey = Object.keys(repoStyles).find(k => k.toLowerCase() === repo.name.toLowerCase());
+          var imgStyle = styleKey ? repoStyles[styleKey] : "aspect-ratio: 16/9; object-fit: cover;";
+
+          allCards.push({
+              name: repo.name.replace(/-/g, ' ').replace(/_/g, ' '),
+              category: language,
+              description: description,
+              url: repo.html_url,
+              linkText: "View details on GitHub",
+              img: img,
+              imgStyle: imgStyle,
+              isInternal: false
+          });
+      });
+
+      // Add static internal cards at the end
+      customStaticCards.forEach(card => {
+          allCards.push(card);
+      });
+
+      if (allCards.length > 0) {
+          allCards.forEach((card) => {
+              var targetAttr = card.isInternal ? '' : 'target="_blank" rel="noopener noreferrer"';
               var html = `
-                  <div class="col-md-4 col-sm-6 probootstrap-animate fadeInUp probootstrap-animated">
-                      <div class="probootstrap-card" style="margin-bottom: 30px;">
+                  <div class="col-md-4 col-sm-6 probootstrap-animate fadeInUp probootstrap-animated" style="margin-bottom: 30px; display: flex;">
+                      <div class="probootstrap-card" style="display: flex; flex-direction: column; width: 100%; height: 100%;">
                           <div class="probootstrap-card-media">
-                              <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer"><img src="${img}" class="img-responsive img-border" alt="${repo.name}" style="${imgStyle}"></a>
+                              <a href="${card.url}" ${targetAttr}><img src="${card.img}" class="img-responsive img-border" alt="${card.name}" style="${card.imgStyle}"></a>
                           </div>
-                          <div class="probootstrap-card-text">
-                              <h2 class="probootstrap-card-heading mb0">${repo.name.replace(/-/g, ' ').replace(/_/g, ' ')}</h2>
-                              <p class="category">${language}</p>
-                              <p style="min-height: 80px;">${description}</p>
-                              <p><a href="${repo.html_url}" target="_blank" rel="noopener noreferrer">View details on GitHub</a></p>
+                          <div class="probootstrap-card-text" style="display: flex; flex-direction: column; flex-grow: 1;">
+                              <h2 class="probootstrap-card-heading mb0">${card.name}</h2>
+                              <p class="category">${card.category}</p>
+                              <p style="margin-bottom: 5px;">${card.description}</p>
+                              <p style="margin-top: auto; padding-top: 0; margin-bottom: 0;"><a href="${card.url}" ${targetAttr}>${card.linkText}</a></p>
                           </div>
                       </div>
                   </div>
@@ -94,7 +140,7 @@ var fetchGitHubRepos = function() {
               container.append(html);
           });
       } else {
-          container.html('<div class="col-md-12 text-center"><p>No repositories found.</p></div>');
+          container.html('<div class="col-md-12 text-center"><p>No projects found.</p></div>');
       }
   })
   .catch(error => {
