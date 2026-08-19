@@ -208,7 +208,7 @@ var initCommandPalette = function() {
       <div class="cmd-palette-modal">
         <div class="cmd-header">
           <i class="icon-search"></i>
-          <input type="text" id="cmd-input" class="cmd-input" placeholder="Type a command or search projects..." autocomplete="off">
+          <input type="text" id="cmd-input" class="cmd-input" placeholder="Search page or action..." autocomplete="off">
           <span class="cmd-badge">ESC to close</span>
         </div>
         <div class="cmd-results" id="cmd-results"></div>
@@ -233,30 +233,18 @@ var initCommandPalette = function() {
   var items = [
     // Navigation
     { title: "Home Page", category: "Navigation", icon: "icon-home", action: function() { window.location.href = "index.html"; } },
-    { title: "Projects Grid", category: "Navigation", icon: "icon-briefcase", action: function() { window.location.href = "projects.html"; } },
+    { title: "Projects Page", category: "Navigation", icon: "icon-briefcase", action: function() { window.location.href = "projects.html"; } },
     { title: "About Wassim", category: "Navigation", icon: "icon-user", action: function() { window.location.href = "about.html"; } },
     { title: "Contact Form", category: "Navigation", icon: "icon-mail", action: function() { window.location.href = "contact.html"; } },
 
-    // Featured Projects
-    { title: "Transformer PyTorch", category: "Project", icon: "icon-code", action: function() { window.open("https://github.com/Wassim-Hamra/Transformer_PyTorch", "_blank"); } },
-    { title: "PathFinder Route Explorer", category: "Project", icon: "icon-compass", action: function() { window.open("https://github.com/Wassim-Hamra/PathFinder", "_blank"); } },
-    { title: "Rust Command Shell", category: "Project", icon: "icon-terminal", action: function() { window.open("https://github.com/Wassim-Hamra/Rust-Command-Shell", "_blank"); } },
-    { title: "Video AI Transcription & Translation", category: "Project", icon: "icon-video", action: function() { window.open("https://github.com/Wassim-Hamra/Video-Transcription-Translation-AI-System", "_blank"); } },
-    { title: "Deepkit Machine Learning Library", category: "Project", icon: "icon-layers", action: function() { window.open("https://github.com/Wassim-Hamra/Deepkit", "_blank"); } },
-    { title: "Sentiment Analysis RNN", category: "Project", icon: "icon-pie-chart", action: function() { window.open("https://github.com/Wassim-Hamra/Sentiment-Analysis-RNN", "_blank"); } },
-    { title: "PDF Question Answering RAG Chatbot", category: "Project", icon: "icon-document", action: function() { window.open("https://github.com/Wassim-Hamra/PDF-Question-Answering-Chatbot-using-RAG", "_blank"); } },
-    { title: "Obstacle Avoidance Robot", category: "Project", icon: "icon-cog", action: function() { window.open("https://github.com/Wassim-Hamra/Obstacle_avoidance_robot", "_blank"); } },
-    { title: "Next Word Prediction LSTM", category: "Project", icon: "icon-font", action: function() { window.open("https://github.com/Wassim-Hamra/Next-Word-Prediction-LSTM", "_blank"); } },
-    { title: "Health Center Web App", category: "Project", icon: "icon-heart", action: function() { window.location.href = "under_development.html"; } },
-
     // Actions & Socials
-    { title: "Copy Email Address (wassimhamraa@gmail.com)", category: "Action", icon: "icon-copy", action: function() { 
+    { title: "Copy Email (wassimhamraa@gmail.com)", category: "Action", icon: "icon-copy", action: function() { 
         navigator.clipboard.writeText("wassimhamraa@gmail.com"); 
         alert("Copied wassimhamraa@gmail.com to clipboard!");
       } 
     },
-    { title: "Open LinkedIn Profile", category: "Social", icon: "icon-linkedin", action: function() { window.open("https://www.linkedin.com/in/medwassimhamra/", "_blank"); } },
-    { title: "Open GitHub Profile", category: "Social", icon: "icon-github2", action: function() { window.open("https://github.com/Wassim-Hamra?tab=repositories", "_blank"); } }
+    { title: "LinkedIn Profile", category: "Social", icon: "icon-linkedin", action: function() { window.open("https://www.linkedin.com/in/medwassimhamra/", "_blank"); } },
+    { title: "GitHub Repositories", category: "Social", icon: "icon-github2", action: function() { window.open("https://github.com/Wassim-Hamra?tab=repositories", "_blank"); } }
   ];
 
   var renderItems = function(filterText) {
