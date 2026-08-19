@@ -950,33 +950,39 @@ var initLoungeAudioPlayer = function() {
 
   var isPlaying = false;
   var isTimeRestored = false;
+  var targetSavedTime = parseFloat(sessionStorage.getItem('loungeAudioTime') || '0');
 
-  // Restore audio timestamp AFTER audio metadata is loaded into browser memory
-  var restoreAudioTime = function() {
-    if (isTimeRestored) return;
-    var savedTime = sessionStorage.getItem('loungeAudioTime');
-    if (savedTime) {
+  // Safely restore timestamp only when audio is ready
+  var applySavedTime = function() {
+    if (!isTimeRestored && targetSavedTime > 0) {
       try {
-        var t = parseFloat(savedTime);
-        if (!isNaN(t) && t > 0) {
-          audio.currentTime = t;
-          isTimeRestored = true;
-        }
+        audio.currentTime = targetSavedTime;
+        isTimeRestored = true;
       } catch (e) {}
+    } else if (targetSavedTime <= 0) {
+      isTimeRestored = true;
     }
   };
 
-  audio.onloadedmetadata = restoreAudioTime;
-  audio.oncanplay = restoreAudioTime;
+  audio.onloadedmetadata = applySavedTime;
+  audio.oncanplay = applySavedTime;
 
+  // Protect sessionStorage: ONLY save current time AFTER targetSavedTime has been restored!
   audio.ontimeupdate = function() {
-    if (audio.currentTime > 0) {
+    if (isTimeRestored && audio.currentTime > 0) {
       sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
     }
   };
 
+  // Capture exact timestamp right as user clicks a link to leave page
+  $(window).on('beforeunload pagehide', function() {
+    if (audio && audio.currentTime > 0) {
+      sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
+    }
+  });
+
   var playAudio = function() {
-    restoreAudioTime();
+    applySavedTime();
     audio.play().then(function() {
       isPlaying = true;
       widget.addClass('playing');
