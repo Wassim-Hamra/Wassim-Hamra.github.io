@@ -749,31 +749,6 @@ var initTimelineAnimation = function() {
 };
 
 var initLoungeAudioPlayer = function() {
-  var playlist = [
-    {
-      title: "Lofi Study",
-      artist: "SoulProdMusic",
-      src: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3"
-    },
-    {
-      title: "Midnight Jazz Lounge",
-      artist: "DZY Music",
-      src: "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a735e2.mp3?filename=lofi-chill-medium-10887.mp3"
-    },
-    {
-      title: "Coffee Shop Chill",
-      artist: "Praz Khanal",
-      src: "https://cdn.pixabay.com/download/audio/2022/11/06/audio_c5c99450a8.mp3?filename=coffee-chill-out-126200.mp3"
-    },
-    {
-      title: "Sunset Lo-Fi Beats",
-      artist: "Alex Productions",
-      src: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=lofi-orchestral-10493.mp3"
-    }
-  ];
-
-  var currentTrackIndex = 0;
-
   var playerHtml = `
     <div class="dynamic-island-widget" id="lounge-player-widget">
       <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle player & visitor info">
@@ -809,23 +784,24 @@ var initLoungeAudioPlayer = function() {
           
           <div class="island-expanded-bottom">
             <div class="island-track-details">
-              <span class="lounge-track-title" id="lounge-track-title">${playlist[0].title}</span>
-              <span class="lounge-track-subtitle" id="lounge-track-artist">${playlist[0].artist}</span>
+              <span class="lounge-track-title"><i class="icon-music" style="color:#22eaaa; font-size:11px; margin-right:4px;"></i> Lounge Jazz Vibes</span>
+              <span class="lounge-track-subtitle">Low-key Ambient</span>
             </div>
             <div class="lounge-controls">
               <button class="lounge-btn" id="lounge-card-play-btn" title="Play / Pause">
                 <i class="icon-play2" id="lounge-card-play-icon"></i>
               </button>
-              <button class="lounge-btn" id="lounge-next-btn" title="Next Song">
-                <i class="icon-next2"></i>
+              <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
+                <i class="icon-volume-medium" id="lounge-mute-icon"></i>
               </button>
+              <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.15" title="Volume">
             </div>
           </div>
         </div>
 
       </div>
-      <audio id="lounge-audio" preload="auto">
-        <source src="${playlist[0].src}" type="audio/mpeg">
+      <audio id="lounge-audio" loop preload="auto">
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
       </audio>
     </div>
   `;
@@ -836,53 +812,9 @@ var initLoungeAudioPlayer = function() {
   var audio = $('#lounge-audio')[0];
   var cardPlayBtn = $('#lounge-card-play-btn');
   var cardPlayIcon = $('#lounge-card-play-icon');
-  var nextBtn = $('#lounge-next-btn');
-
-  // Default low-key volume (15%)
-  audio.volume = 0.15;
-
-  var isPlaying = false;
-
-  var loadTrack = function(index) {
-    currentTrackIndex = index;
-    var track = playlist[currentTrackIndex];
-    audio.src = track.src;
-    $('#lounge-track-title').text(track.title);
-    $('#lounge-track-artist').text(track.artist);
-  };
-
-  var playAudio = function() {
-    audio.play().then(function() {
-      isPlaying = true;
-      widget.addClass('playing');
-      cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
-      sessionStorage.setItem('loungeAudioState', 'playing');
-    }).catch(function(e) {
-      console.log('Autoplay deferred for user click:', e);
-    });
-  };
-
-  var pauseAudio = function() {
-    audio.pause();
-    isPlaying = false;
-    widget.removeClass('playing');
-    cardPlayIcon.removeClass('icon-pause2').addClass('icon-play2');
-    sessionStorage.setItem('loungeAudioState', 'paused');
-  };
-
-  var togglePlay = function() {
-    if (isPlaying) {
-      pauseAudio();
-    } else {
-      playAudio();
-    }
-  };
-
-  var playNextTrack = function() {
-    var nextIndex = (currentTrackIndex + 1) % playlist.length;
-    loadTrack(nextIndex);
-    playAudio();
-  };
+  var muteBtn = $('#lounge-mute-btn');
+  var muteIcon = $('#lounge-mute-icon');
+  var volumeSlider = $('#lounge-volume-slider');
 
   // Real-time visitor clock logic
   var updateVisitorTime = function() {
@@ -891,7 +823,7 @@ var initLoungeAudioPlayer = function() {
     var minutes = now.getMinutes();
     var ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
-    hours = hours ? hours : 12;
+    hours = hours ? hours : 12; // '0' should be '12'
     var minutesStr = minutes < 10 ? '0' + minutes : minutes;
     var timeFormatted = hours + ':' + minutesStr + ' ' + ampm;
 
@@ -902,7 +834,7 @@ var initLoungeAudioPlayer = function() {
   updateVisitorTime();
   setInterval(updateVisitorTime, 1000);
 
-  // Fetch visitor IP geolocation (Country only)
+  // Fetch visitor IP geolocation with reliable fallbacks (Country only)
   var setLocationText = function(city, country) {
     var countryOnly = country || city || 'Earth';
     $('#visitor-location-short').text(countryOnly);
@@ -933,10 +865,64 @@ var initLoungeAudioPlayer = function() {
 
   fetchVisitorLocation();
 
-  // Automatically play next song when current track ends
-  $(audio).on('ended', function() {
-    playNextTrack();
-  });
+  // Lower default volume (8% for subtle ambient feel)
+  var defaultVol = 0.08;
+  audio.volume = defaultVol;
+  volumeSlider.val(defaultVol);
+
+  var isPlaying = false;
+
+  // Track playback time continuously so it doesn't reset on page changes
+  audio.ontimeupdate = function() {
+    if (audio.currentTime > 0) {
+      sessionStorage.setItem('loungeAudioTime', audio.currentTime.toString());
+    }
+  };
+
+  var restoreAudioTime = function() {
+    var savedTime = sessionStorage.getItem('loungeAudioTime');
+    if (savedTime) {
+      try {
+        var t = parseFloat(savedTime);
+        if (!isNaN(t) && t > 0) {
+          audio.currentTime = t;
+        }
+      } catch (e) {}
+    }
+  };
+
+  var playAudio = function() {
+    restoreAudioTime();
+    audio.play().then(function() {
+      isPlaying = true;
+      widget.addClass('playing');
+      cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
+      sessionStorage.setItem('loungeAudioState', 'playing');
+    }).catch(function(e) {
+      // If browser blocks silent autoplay without gesture, play on first user touch/scroll/click
+      $(document).one('click scroll keydown touchstart', function() {
+        if (!isPlaying) {
+          playAudio();
+        }
+      });
+    });
+  };
+
+  var pauseAudio = function() {
+    audio.pause();
+    isPlaying = false;
+    widget.removeClass('playing');
+    cardPlayIcon.removeClass('icon-pause2').addClass('icon-play2');
+    sessionStorage.setItem('loungeAudioState', 'paused');
+  };
+
+  var togglePlay = function() {
+    if (isPlaying) {
+      pauseAudio();
+    } else {
+      playAudio();
+    }
+  };
 
   // Capsule Click -> Toggle Island Expansion
   capsule.on('click', function(e) {
@@ -963,14 +949,36 @@ var initLoungeAudioPlayer = function() {
     togglePlay();
   });
 
-  // Next Song button
-  nextBtn.on('click', function(e) {
+  // Volume slider input
+  volumeSlider.on('input change', function(e) {
     e.stopPropagation();
-    playNextTrack();
+    var val = parseFloat($(this).val());
+    audio.volume = val;
+    if (val === 0) {
+      muteIcon.removeClass('icon-volume-medium icon-volume-high').addClass('icon-volume-mute2');
+    } else {
+      muteIcon.removeClass('icon-volume-mute2').addClass('icon-volume-medium');
+    }
   });
 
-  // Seamless playback across page navigation
-  if (sessionStorage.getItem('loungeAudioState') === 'playing') {
+  // Mute button click
+  muteBtn.on('click', function(e) {
+    e.stopPropagation();
+    if (audio.volume > 0) {
+      audio.dataset.prevVolume = audio.volume;
+      audio.volume = 0;
+      volumeSlider.val(0);
+      muteIcon.removeClass('icon-volume-medium icon-volume-high').addClass('icon-volume-mute2');
+    } else {
+      var prev = parseFloat(audio.dataset.prevVolume) || defaultVol;
+      audio.volume = prev;
+      volumeSlider.val(prev);
+      muteIcon.removeClass('icon-volume-mute2').addClass('icon-volume-medium');
+    }
+  });
+
+  // Auto-play on entry or resume if user hasn't explicitly paused
+  if (sessionStorage.getItem('loungeAudioState') !== 'paused') {
     playAudio();
   }
 };
