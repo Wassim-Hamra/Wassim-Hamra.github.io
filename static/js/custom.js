@@ -750,27 +750,38 @@ var initTimelineAnimation = function() {
 
 var initLoungeAudioPlayer = function() {
   var playerHtml = `
-    <div class="lounge-player-widget" id="lounge-player-widget">
-      <div class="lounge-player-card" id="lounge-player-card">
-        <div class="lounge-track-info">
-          <span class="lounge-track-title">Lounge Jazz Vibes</span>
-          <span class="lounge-track-subtitle">Low-key Ambient</span>
+    <div class="dynamic-island-widget" id="lounge-player-widget">
+      <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle audio player">
+        
+        <!-- Collapsed Content -->
+        <div class="island-collapsed-content">
+          <div class="island-left-info">
+            <i class="icon-music"></i>
+            <span class="island-mini-title">Jazz Lounge</span>
+          </div>
+          <div class="lounge-eq-bars">
+            <span></span><span></span><span></span><span></span>
+          </div>
         </div>
-        <div class="lounge-controls">
-          <button class="lounge-btn" id="lounge-card-play-btn" title="Play / Pause">
-            <i class="icon-play2" id="lounge-card-play-icon"></i>
-          </button>
-          <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
-            <i class="icon-volume-medium" id="lounge-mute-icon"></i>
-          </button>
-          <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.15" title="Volume">
+
+        <!-- Expanded Content -->
+        <div class="island-expanded-content">
+          <div class="island-track-details">
+            <span class="lounge-track-title">Lounge Jazz Vibes</span>
+            <span class="lounge-track-subtitle">Low-key Ambient</span>
+          </div>
+          <div class="lounge-controls">
+            <button class="lounge-btn" id="lounge-card-play-btn" title="Play / Pause">
+              <i class="icon-play2" id="lounge-card-play-icon"></i>
+            </button>
+            <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
+              <i class="icon-volume-medium" id="lounge-mute-icon"></i>
+            </button>
+            <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.15" title="Volume">
+          </div>
         </div>
+
       </div>
-      <button class="lounge-player-toggle" id="lounge-player-toggle" title="Toggle Lounge Music">
-        <div class="lounge-eq-bars" id="lounge-eq-bars">
-          <span></span><span></span><span></span><span></span>
-        </div>
-      </button>
       <audio id="lounge-audio" loop preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
       </audio>
@@ -779,15 +790,15 @@ var initLoungeAudioPlayer = function() {
   $('body').append(playerHtml);
 
   var widget = $('#lounge-player-widget');
+  var capsule = $('#lounge-island-capsule');
   var audio = $('#lounge-audio')[0];
-  var toggleBtn = $('#lounge-player-toggle');
   var cardPlayBtn = $('#lounge-card-play-btn');
   var cardPlayIcon = $('#lounge-card-play-icon');
   var muteBtn = $('#lounge-mute-btn');
   var muteIcon = $('#lounge-mute-icon');
   var volumeSlider = $('#lounge-volume-slider');
 
-  // Set default low-key volume (15%)
+  // Default low-key volume (15%)
   audio.volume = 0.15;
   volumeSlider.val(0.15);
 
@@ -820,21 +831,35 @@ var initLoungeAudioPlayer = function() {
     }
   };
 
-  // Toggle button click
-  toggleBtn.on('click', function(e) {
-    e.stopPropagation();
-    widget.toggleClass('active');
-    togglePlay();
+  // Capsule Click -> Toggle Island Expansion
+  capsule.on('click', function(e) {
+    // If clicking on controls inside expanded state, don't collapse immediately
+    if ($(e.target).closest('.lounge-controls').length > 0) {
+      return;
+    }
+    
+    widget.toggleClass('expanded');
+    if (!isPlaying) {
+      playAudio();
+    }
   });
 
-  // Card Play button click
+  // Collapse island when clicking outside
+  $(document).on('click', function(e) {
+    if ($(e.target).closest('#lounge-player-widget').length === 0) {
+      widget.removeClass('expanded');
+    }
+  });
+
+  // Play / Pause button
   cardPlayBtn.on('click', function(e) {
     e.stopPropagation();
     togglePlay();
   });
 
   // Volume slider input
-  volumeSlider.on('input change', function() {
+  volumeSlider.on('input change', function(e) {
+    e.stopPropagation();
     var val = parseFloat($(this).val());
     audio.volume = val;
     if (val === 0) {
