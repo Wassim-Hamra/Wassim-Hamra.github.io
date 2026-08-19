@@ -781,11 +781,8 @@ var initLoungeAudioPlayer = function() {
             <span class="island-time-badge">
               <i class="icon-clock2"></i> <span id="expanded-time-text">--:--</span>
             </span>
-            <span id="expanded-battery-badge" class="island-time-badge" style="color:#22eaaa;">
-              <span id="expanded-battery-text"></span>
-            </span>
           </div>
-          
+
           <div class="island-expanded-bottom">
             <div class="island-track-details">
               <span class="lounge-track-title"><i class="icon-music" style="color:#22eaaa; font-size:11px; margin-right:4px;"></i> Lounge Jazz Vibes</span>
@@ -838,7 +835,7 @@ var initLoungeAudioPlayer = function() {
   updateVisitorTime();
   setInterval(updateVisitorTime, 1000);
 
-  // Cached Geolocation & Open-Meteo Weather
+  // Cached Geolocation & Open-Meteo Weather (High precision)
   var formatWeather = function(temp, code, isDay) {
     var symbol = '☀️';
     if (isDay === 0) symbol = '🌙';
@@ -854,12 +851,12 @@ var initLoungeAudioPlayer = function() {
     $('#visitor-location-short').text(countryDisplay);
     $('#expanded-location-text').text(countryDisplay);
     if (weatherText) {
-      $('#expanded-weather-badge').html('<span style="color:#22eaaa;">' + weatherText + '</span>');
+      $('#expanded-weather-badge').html('<span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
     }
   };
 
   var fetchVisitorLocationAndWeather = function() {
-    // 1. Check if cached in sessionStorage to prevent re-fetching on every page navigation
+    // Check if cached in sessionStorage
     var cached = sessionStorage.getItem('visitorGeoData');
     if (cached) {
       try {
@@ -869,15 +866,15 @@ var initLoungeAudioPlayer = function() {
       } catch (e) {}
     }
 
-    // 2. Fetch IP Geolocation
+    // Fetch IP Geolocation
     $.getJSON('https://ipapi.co/json/', function(data) {
       var country = data.country_name || data.country || 'Tunisia';
       var lat = data.latitude;
       var lon = data.longitude;
 
       if (lat && lon) {
-        // Fetch Weather
-        $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true', function(weatherRes) {
+        // Fetch Real Weather from Open-Meteo with timezone=auto
+        $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto', function(weatherRes) {
           var w = weatherRes.current_weather;
           var weatherText = formatWeather(w.temperature, w.weathercode, w.is_day);
           sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: weatherText }));
@@ -897,7 +894,7 @@ var initLoungeAudioPlayer = function() {
         var lat = data2.latitude;
         var lon = data2.longitude;
         if (lat && lon) {
-          $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true', function(weatherRes) {
+          $.getJSON('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true&timezone=auto', function(weatherRes) {
             var w = weatherRes.current_weather;
             var weatherText = formatWeather(w.temperature, w.weathercode, w.is_day);
             sessionStorage.setItem('visitorGeoData', JSON.stringify({ country: country, weatherText: weatherText }));
@@ -918,20 +915,6 @@ var initLoungeAudioPlayer = function() {
   };
 
   fetchVisitorLocationAndWeather();
-
-  // Web Battery API
-  if (navigator.getBattery) {
-    navigator.getBattery().then(function(battery) {
-      var updateBattery = function() {
-        var level = Math.round(battery.level * 100);
-        var icon = battery.charging ? '⚡' : '🔋';
-        $('#expanded-battery-text').text(icon + ' ' + level + '%');
-      };
-      updateBattery();
-      battery.onlevelchange = updateBattery;
-      battery.onchargingchange = updateBattery;
-    });
-  }
 
   // Audio setup: Lower default volume (8%)
   var defaultVol = 0.08;
