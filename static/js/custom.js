@@ -22,8 +22,6 @@ $(document).ready(function() {
   initSkillBars(); // Animate technical skill progress bars
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
-  initThemeSwitcher(); // Initialize navbar color theme switcher dropdown
-  initAgentVisualizer(); // Initialize the Agent LangGraph simulation on the homepage
 });
 
 var fetchGitHubRepos = function() {
@@ -749,198 +747,18 @@ var initTimelineAnimation = function() {
   setTimeout(checkScroll, 100);
 };
 
-var initThemeSwitcher = function() {
-  var target = $('.probootstrap-right-nav.hidden-xs');
-  if (target.length === 0) return;
-
-  var currentTheme = localStorage.getItem('portfolio-theme') || 'green';
-
-  var switcherHtml = `
-    <li class="theme-switcher-container">
-      <a href="#" id="theme-switcher-btn" title="Change Theme Color"><i class="icon-cog"></i></a>
-      <div class="theme-switcher-dropdown" id="theme-switcher-dropdown">
-        <span class="theme-dropdown-title">Theme Accent</span>
-        <div class="theme-colors-grid">
-          <button class="theme-color-btn green ${currentTheme === 'green' ? 'active' : ''}" data-theme="green" style="background-color: #22eaaa;" title="Brand Green"></button>
-          <button class="theme-color-btn red ${currentTheme === 'red' ? 'active' : ''}" data-theme="red" style="background-color: #ff1801;" title="Ferrari Red"></button>
-          <button class="theme-color-btn purple ${currentTheme === 'purple' ? 'active' : ''}" data-theme="purple" style="background-color: #b026ff;" title="Cyber Purple"></button>
-          <button class="theme-color-btn blue ${currentTheme === 'blue' ? 'active' : ''}" data-theme="blue" style="background-color: #1f75fe;" title="Classic Blue"></button>
-        </div>
-      </div>
-    </li>
-  `;
-  target.append(switcherHtml);
-
-  // Set initial active state in HTML element
-  $('html').attr('data-theme', currentTheme);
-
-  // Toggle dropdown on click
-  $('#theme-switcher-btn').on('click', function(e) {
+var initFooterActions = function() {
+  $(document).on('click', '#footer-cmd-trigger', function(e) {
     e.preventDefault();
-    e.stopPropagation();
-    $('#theme-switcher-dropdown').toggleClass('open');
+    $('#cmd-palette-btn').trigger('click');
   });
 
-  // Close on click outside
-  $(document).on('click', function() {
-    $('#theme-switcher-dropdown').removeClass('open');
-  });
-
-  $('#theme-switcher-dropdown').on('click', function(e) {
-    e.stopPropagation();
-  });
-
-  // Handle color option click
-  $('.theme-color-btn').on('click', function() {
-    var theme = $(this).attr('data-theme');
-    
-    // Update data attribute and active states
-    $('html').attr('data-theme', theme);
-    $('.theme-color-btn').removeClass('active');
-    $(this).addClass('active');
-    
-    // Save selection
-    localStorage.setItem('portfolio-theme', theme);
-  });
-};
-};
-
-var initAgentVisualizer = function() {
-  var btnRun = $('#btn-run-agent');
-  var terminalBody = $('#agent-terminal-body');
-  if (btnRun.length === 0) return;
-
-  // The simulation steps
-  var steps = [
-    {
-      node: 'node-request',
-      delay: 500,
-      logs: [
-        { level: 'info', text: 'Initializing Agent Workflow...' },
-        { level: 'info', text: 'Received query: "Check GDPR compliance for Taho AI mock docs."' }
-      ]
-    },
-    {
-      node: 'node-planner',
-      delay: 1500,
-      logs: [
-        { level: 'info', module: '[PLANNER]', text: 'Analyzing request intent...' },
-        { level: 'info', module: '[PLANNER]', text: 'Identified required tasks: [Data Retrieval, Legal Check].' },
-        { level: 'warn', module: '[PLANNER]', text: 'Routing to Vector RAG tool for context retrieval.' }
-      ]
-    },
-    {
-      node: 'node-retriever',
-      delay: 2000,
-      logs: [
-        { level: 'info', module: '[RAG]', text: 'Connecting to Vector Database...' },
-        { level: 'info', module: '[RAG]', text: 'Performing semantic search on collection: "taho-ai-docs"...' },
-        { level: 'success', module: '[RAG]', text: 'Found 3 relevant chunks. Extracting text.' }
-      ]
-    },
-    {
-      node: 'node-reasoner',
-      delay: 2500,
-      logs: [
-        { level: 'info', module: '[REASONER]', text: 'Evaluating retrieved context against GDPR Art. 5 (Data Minimization).' },
-        { level: 'info', module: '[REASONER]', text: 'Running LLM chain inference...' },
-        { level: 'warn', module: '[REASONER]', text: 'Detected missing consent forms in dataset C.' },
-        { level: 'info', module: '[REASONER]', text: 'Drafting compliance report.' }
-      ]
-    },
-    {
-      node: 'node-output',
-      delay: 1000,
-      logs: [
-        { level: 'success', module: '[OUTPUT]', text: 'Final Answer generated successfully.' },
-        { level: 'info', text: 'Agent Execution Completed (Total time: 1.4s)' }
-      ]
-    }
-  ];
-
-  var isRunning = false;
-
-  var getTimestamp = function() {
-    var d = new Date();
-    return d.toISOString().split('T')[1].substring(0, 12);
-  };
-
-  var appendLog = function(log, callback) {
-    var line = $('<div class="terminal-line"></div>');
-    var ts = $('<span class="timestamp"></span>').text('[' + getTimestamp() + ']');
-    line.append(ts);
-    
-    if (log.module) {
-      line.append($('<span class="agent-module"></span>').text(log.module + ' '));
-    }
-    
-    var textSpan = $('<span class="level-' + log.level + '"></span>');
-    line.append(textSpan);
-    terminalBody.append(line);
-    
-    // Auto-scroll
-    terminalBody.scrollTop(terminalBody[0].scrollHeight);
-
-    // Typewriter effect
-    var i = 0;
-    var interval = setInterval(function() {
-      textSpan.text(textSpan.text() + log.text.charAt(i));
-      i++;
-      if (i >= log.text.length) {
-        clearInterval(interval);
-        setTimeout(callback, 200); // slight pause after typing
-      }
-    }, 20); // typing speed
-  };
-
-  var processStep = function(stepIndex) {
-    if (stepIndex >= steps.length) {
-      isRunning = false;
-      btnRun.html('<i class="icon-reload"></i> Re-run Simulation').removeClass('disabled');
-      return;
-    }
-
-    var step = steps[stepIndex];
-    
-    // Activate node & arrow
-    $('.agent-node, .agent-arrow').removeClass('active');
-    $('#' + step.node).addClass('active');
-    $('#' + step.node).prev('.agent-arrow').addClass('active');
-    
-    var logIndex = 0;
-    var processLog = function() {
-      if (logIndex >= step.logs.length) {
-        setTimeout(function() {
-          processStep(stepIndex + 1);
-        }, step.delay);
-        return;
-      }
-      appendLog(step.logs[logIndex], function() {
-        logIndex++;
-        processLog();
-      });
-    };
-
-    processLog();
-  };
-
-  btnRun.on('click', function(e) {
+  $(document).on('click', '.footer-back-to-top-btn', function(e) {
     e.preventDefault();
-    if (isRunning) return;
-    isRunning = true;
-    
-    btnRun.addClass('disabled').html('<i class="icon-spinner2 icon-spin"></i> Running...');
-    terminalBody.empty();
-    $('.agent-node, .agent-arrow').removeClass('active');
-    
-    // Add cursor
-    terminalBody.append('<div class="terminal-cursor" id="term-cursor"></div>');
-    
-    setTimeout(function() {
-      $('#term-cursor').remove();
-      processStep(0);
-    }, 500);
+    $('html, body').animate({ scrollTop: 0 }, 500);
   });
 };
+
+initFooterActions();
 
 });
