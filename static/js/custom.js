@@ -21,8 +21,12 @@ $(document).ready(function() {
 });
 
 var fetchGitHubRepos = function() {
-  var container = $('#github-repos-container');
-  if (container.length === 0) return;
+  var projectsPageContainer = $('#github-repos-container');
+  var homePageContainer = $('#home-projects-container');
+  if (projectsPageContainer.length === 0 && homePageContainer.length === 0) return;
+
+  var container = projectsPageContainer.length > 0 ? projectsPageContainer : homePageContainer;
+  var limit = homePageContainer.length > 0 ? 3 : null;
 
   var reposToFetch = [
       "Transformer_PyTorch",
@@ -79,16 +83,22 @@ var fetchGitHubRepos = function() {
       }
   ];
 
-  Promise.all(reposToFetch.map(repoName => 
-      fetch(`https://api.github.com/repos/Wassim-Hamra/${repoName}`)
-          .then(res => res.ok ? res.json() : null)
-          .catch(() => null)
-  ))
+  fetch('https://api.github.com/users/Wassim-Hamra/repos?per_page=100')
+  .then(res => res.ok ? res.json() : [])
   .then(results => {
       container.empty();
       
       var allCards = [];
-      var validRepos = results.filter(r => r !== null);
+      var validRepos = [];
+      
+      if (Array.isArray(results)) {
+          reposToFetch.forEach(repoName => {
+              var found = results.find(r => r.name.toLowerCase() === repoName.toLowerCase());
+              if (found) {
+                  validRepos.push(found);
+              }
+          });
+      }
       validRepos.forEach((repo) => {
           var description = repo.description || "No description provided.";
           var language = repo.language || "Markdown";
@@ -120,8 +130,10 @@ var fetchGitHubRepos = function() {
           allCards.push(card);
       });
 
-      if (allCards.length > 0) {
-          allCards.forEach((card) => {
+      var cardsToRender = limit ? allCards.slice(0, limit) : allCards;
+
+      if (cardsToRender.length > 0) {
+          cardsToRender.forEach((card) => {
               var targetAttr = card.isInternal ? '' : 'target="_blank" rel="noopener noreferrer"';
               var html = `
                   <div class="col-md-4 col-sm-6 probootstrap-animate fadeInUp probootstrap-animated" style="margin-bottom: 30px; display: flex;">
