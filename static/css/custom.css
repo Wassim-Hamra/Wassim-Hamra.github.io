@@ -9,38 +9,38 @@
 }
 
 /* ==========================================================================
-   Spotlight Command Palette (Ctrl+K) Styles - Tailored to Website Theme
+   Spotlight Command Palette (Glassmorphism + Neutral Theme)
    ========================================================================== */
 
 .btn-cmd-palette {
     display: inline-block !important;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgba(255, 255, 255, 0.75) !important;
     font-size: 16px;
     transition: all 0.2s ease-in-out;
     text-decoration: none !important;
-    padding: 0 5px !important;
+    padding: 0 6px !important;
 }
 
 .btn-cmd-palette:hover {
-    color: #3072a8 !important;
-    transform: scale(1.1);
+    color: #ffffff !important;
+    transform: scale(1.12);
 }
 
-/* Command Palette Overlay */
+/* Glassmorphism Overlay */
 .cmd-palette-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     z-index: 999999;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 110px;
+    padding-top: 100px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
@@ -52,15 +52,18 @@
     pointer-events: auto;
 }
 
+/* Glass Modal Container */
 .cmd-palette-modal {
-    background: #181b1e;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
+    background: rgba(22, 25, 28, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     width: 90%;
-    max-width: 580px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(48, 114, 168, 0.2);
+    max-width: 600px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
     overflow: hidden;
-    transform: translateY(-12px) scale(0.98);
+    transform: translateY(-10px) scale(0.97);
     transition: transform 0.2s ease;
 }
 
@@ -72,14 +75,15 @@
     display: flex;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: #121416;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
 }
 
 .cmd-header i {
-    color: #3072a8;
+    color: #ffffff;
     font-size: 18px;
     margin-right: 12px;
+    opacity: 0.9;
 }
 
 .cmd-input {
@@ -87,19 +91,19 @@
     background: transparent;
     border: none;
     color: #ffffff;
-    font-size: 15px;
+    font-size: 16px;
     font-family: inherit;
     outline: none !important;
     box-shadow: none !important;
 }
 
 .cmd-input::placeholder {
-    color: #777;
+    color: #8b949e;
 }
 
 .cmd-badge {
-    background: rgba(255, 255, 255, 0.08);
-    color: #aaa;
+    background: rgba(255, 255, 255, 0.12);
+    color: #c9d1d9;
     padding: 3px 8px;
     border-radius: 4px;
     font-size: 11px;
@@ -109,18 +113,18 @@
 }
 
 .cmd-results {
-    max-height: 320px;
+    max-height: 340px;
     overflow-y: auto;
     padding: 8px 0;
 }
 
 .cmd-group-heading {
-    padding: 8px 20px 4px 20px;
+    padding: 10px 20px 4px 20px;
     font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #3072a8;
+    color: #8b949e;
 }
 
 .cmd-item {
@@ -128,14 +132,14 @@
     align-items: center;
     justify-content: space-between;
     padding: 11px 20px;
-    color: #ccc;
+    color: #d1d5db;
     cursor: pointer;
     text-decoration: none !important;
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .cmd-item:hover, .cmd-item.active {
-    background: rgba(48, 114, 168, 0.18);
+    background: rgba(255, 255, 255, 0.12);
     color: #ffffff !important;
 }
 
@@ -146,20 +150,20 @@
 }
 
 .cmd-item-icon {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #3072a8;
-    font-size: 14px;
+    color: #ffffff;
+    font-size: 15px;
     flex-shrink: 0;
 }
 
 .cmd-item.active .cmd-item-icon {
-    background: #3072a8;
+    background: rgba(255, 255, 255, 0.25);
     color: #ffffff;
 }
 
@@ -176,12 +180,12 @@
 
 .cmd-item-category {
     font-size: 11px;
-    color: #888;
+    color: #9ca3af;
 }
 
 .cmd-item-shortcut {
     font-size: 12px;
-    color: #666;
+    color: #6b7280;
 }
 
 .cmd-footer {
@@ -191,8 +195,8 @@
     align-items: center;
     justify-content: space-between;
     font-size: 11px;
-    color: #777;
-    background: #111315;
+    color: #8b949e;
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .cmd-footer-keys {
@@ -207,8 +211,8 @@
 }
 
 .cmd-footer-key kbd {
-    background: rgba(255, 255, 255, 0.1);
-    color: #aaa;
+    background: rgba(255, 255, 255, 0.12);
+    color: #d1d5db;
     padding: 1px 5px;
     border-radius: 3px;
     font-size: 10px;
