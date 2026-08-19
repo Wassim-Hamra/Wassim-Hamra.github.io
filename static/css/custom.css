@@ -251,7 +251,7 @@
 }
 
 .skill-percent {
-    color: #58a6ff;
+    color: #22eaaa;
     font-size: 13px;
     font-weight: 600;
     font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
@@ -268,7 +268,7 @@
 .skill-progress-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #3072a8 0%, #58a6ff 100%);
+    background: linear-gradient(90deg, #22eaaa 0%, #39ecb3 100%);
     border-radius: 10px;
     transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -304,5 +304,5 @@
 
 .tech-tag i {
     font-size: 13px;
-    color: #58a6ff;
+    color: #22eaaa;
 }

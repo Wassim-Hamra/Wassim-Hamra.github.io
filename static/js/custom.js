@@ -382,21 +382,20 @@ var initSkillBars = function() {
   var fills = $('.skill-progress-fill');
   if (fills.length === 0) return;
 
-  var animateBars = function() {
+  var animate = function() {
     fills.each(function() {
       var bar = $(this);
-      var targetPercent = bar.attr('data-percent');
-      var barTop = bar.offset().top;
-      var winBottom = $(window).scrollTop() + $(window).height();
-      
-      if (winBottom > barTop - 50) {
-        bar.css('width', targetPercent);
-      }
+      bar.css('width', bar.attr('data-percent'));
     });
   };
 
-  animateBars();
-  $(window).on('scroll', animateBars);
+  // If already open (or visible), animate immediately
+  if ($('#collapseTwo').hasClass('in')) {
+    animate();
+  }
+
+  // Animate when the Skills collapse panel is shown
+  $('#collapseTwo').on('shown.bs.collapse', animate);
 };
 
 });
