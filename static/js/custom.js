@@ -761,15 +761,18 @@ var initLoungeAudioPlayer = function() {
               <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
             </span>
           </div>
-          <div class="lounge-eq-bars">
-            <span></span><span></span><span></span><span></span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 11px; color: #8b949e; display: flex; align-items: center; gap: 4px;">
+              <i class="icon-music" style="color: #22eaaa; font-size: 11px;"></i> Jazz
+            </span>
+            <div class="lounge-eq-bars">
+              <span></span><span></span><span></span><span></span>
+            </div>
           </div>
         </div>
 
         <!-- Expanded Content -->
         <div class="island-expanded-content">
-          <div class="island-top-notch-tag">DYNAMIC ISLAND</div>
-          
           <div class="island-expanded-top">
             <span class="island-location-badge">
               <i class="icon-location2"></i> <span id="expanded-location-text">Detecting...</span>
@@ -843,6 +846,32 @@ var initLoungeAudioPlayer = function() {
     return symbol + ' ' + Math.round(temp) + '°C';
   };
 
+  // Send email notification on new visitor entry via Web3Forms (Option 3)
+  var notifyVisitorEntry = function(country) {
+    if (sessionStorage.getItem('visitorNotified')) return;
+    sessionStorage.setItem('visitorNotified', 'true');
+
+    var page = window.location.pathname || 'index.html';
+    var timeStr = new Date().toLocaleString();
+    var userAgent = navigator.userAgent;
+
+    $.ajax({
+      url: 'https://api.web3forms.com/submit',
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+        subject: '🔔 New Portfolio Visitor Alert: ' + (country || 'Unknown Location'),
+        from_name: 'Portfolio Visitor Alert',
+        message: 'New visitor landed on your portfolio!\n\n' +
+                 '📍 Country: ' + (country || 'Unknown') + '\n' +
+                 '📄 Landing Page: ' + page + '\n' +
+                 '🕒 Time: ' + timeStr + '\n' +
+                 '💻 Device Info: ' + userAgent
+      }
+    });
+  };
+
   var applyGeoAndWeather = function(country, weatherText) {
     var countryDisplay = country || 'Earth';
     $('#visitor-location-short').text(countryDisplay);
@@ -850,6 +879,7 @@ var initLoungeAudioPlayer = function() {
     if (weatherText) {
       $('#expanded-weather-badge').html('<span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
     }
+    notifyVisitorEntry(countryDisplay);
   };
 
   var fetchVisitorLocationAndWeather = function() {

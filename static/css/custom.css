@@ -882,8 +882,8 @@
 }
 
 .dynamic-island-capsule {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(18, 22, 28, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 24px;
     padding: 0 22px;
     height: 48px;
@@ -891,9 +891,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 0 25px rgba(34, 234, 170, 0.2);
-    backdrop-filter: blur(25px) saturate(200%) brightness(1.15);
-    -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.15);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 20px rgba(34, 234, 170, 0.12);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     cursor: pointer;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -902,24 +902,24 @@
 }
 
 .dynamic-island-capsule:hover {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.07) 100%);
-    border-color: rgba(34, 234, 170, 0.6);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 0 35px rgba(34, 234, 170, 0.35);
+    background: rgba(22, 28, 36, 0.55);
+    border-color: rgba(34, 234, 170, 0.5);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 30px rgba(34, 234, 170, 0.3);
     width: 330px;
 }
 
-/* Expanded Taskbar Popup State (Light Crystal Glassmorphism) */
+/* Expanded Taskbar Popup State (Ultra-Glassy Translucent Frosted Glass) */
 .dynamic-island-widget.expanded .dynamic-island-capsule {
     width: 500px;
     max-width: 92vw;
     height: 106px;
     border-radius: 28px;
     padding: 16px 26px 20px 26px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(20, 25, 32, 0.7) 100%);
-    border-color: rgba(34, 234, 170, 0.5);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.45), 0 0 40px rgba(34, 234, 170, 0.25);
-    backdrop-filter: blur(35px) saturate(220%) brightness(1.2);
-    -webkit-backdrop-filter: blur(35px) saturate(220%) brightness(1.2);
+    background: rgba(16, 20, 26, 0.65);
+    border-color: rgba(34, 234, 170, 0.45);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 0 35px rgba(34, 234, 170, 0.2);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
