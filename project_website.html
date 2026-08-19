@@ -97,39 +97,35 @@
             <div class="col-md-9">
                 <p><img src="static/img/screenshot.png" alt="Mohamed Wassim Hamra"
                         class="img-responsive img-border"></p>
-                <h2>Development Process:</h2>
+                <h2>Development & Evolution Process:</h2>
 
-                <p>So, here's the scoop on how this website came to life:</p>
+                <p>Here's the real story of how this website started and evolved into what you see right now:</p>
 
-                <h4>🎨 Custom Design:</h4>
-                <p>I started with a template from uicookies as my canvas and
-                transformed it to align with my vision. The HTML and CSS code underwent significant modifications to
-                match my
-                preferences and what I like.</p>
+                <h4>🎨 Phase 1: From Scratch to Canvas</h4>
+                <p>I started with a clean template from uiCookies as my initial foundation, then heavily customized the HTML, CSS, and layout to build a dark-mode portfolio reflecting my personal aesthetic.</p>
 
-                <h4>🚀 Bootstrap and jQuery: </h4>
-                <p>To add specific elements and enhance user interactions, I
-                used Bootstrap and
-                jQuery. This allowed me to create a visually engaging UI/UX.</p>
+                <h4>🐍 Phase 2: Python & Django (Historical)</h4>
+                <p>Originally, I powered the backend with Django 4.2 and Python, handling contact form submissions via <code>smtplib</code> and MySQL. To simplify maintenance and host for free on GitHub Pages, I later converted the entire site into a high-performance static architecture.</p>
 
-                <h4>🐍 Python & Django Backend -> Deprecated</h4>
-                <p>Powered by Django V4.2 and Python, the backend ensures
-                data processing and content administration.</p>
+                <h4>💬 Phase 3: Wassim's Assistant (Glassmorphic AI Chatbot)</h4>
+                <p>Added an interactive chatbot widget floating on the bottom-left. It features glassmorphism styling, human-curated FAQ answers, and interactive prompt pills so visitors can learn about my background or ask for contact info right away.</p>
 
-                <h4>📩 Messages Management:</h4>
-                <p>I used the integrated python library smtplib to automatically send a
-                personalized email
-                to my personal account to notify me about new newsletter subscribers or new messages from the contact me
-                page that was also stored in a mysql database.</p>
+                <h4>🌴 Phase 4: Taskbar Dynamic Dock & Lounge Player</h4>
+                <p>Built a floating, see-through frosted glass Dynamic Dock (<code>backdrop-filter: blur(32px)</code>) at the bottom-center of the screen. It packs:</p>
+                <ul>
+                  <li><strong>📍 Real-Time Location:</strong> Detects visitor country using IP geolocation (cached in session memory for zero reload latency).</li>
+                  <li><strong>🌤️ Live Local Weather:</strong> Queries real-time weather & temperature via Open-Meteo API.</li>
+                  <li><strong>🕒 Live Local Clock:</strong> Real-time 1-second updating clock.</li>
+                  <li><strong>🎵 Chill Lounge Audio Player:</strong> Plays a soft 8% volume lo-fi jazz track with seamless cross-page playback that never resets when switching pages.</li>
+                </ul>
 
-                <h4>🌐 Dependable Hosting: </h4>
-                <p>Originally hosted on Heroku, I later transformed the website into a
-                static version to take advantage of the free web hosting provided by GitHub Pages.</p>
+                <h4>🎓 Phase 5: Two-Track Timeline & Interactive Hobbies</h4>
+                <p>Re-architected the <em>About Me</em> page into two parallel tracks (Education & Internship/Work Experience), upgraded the CV download button with a neon glass glow, and turned plain lists into hover-interactive hobby cards (F1, Coding, Football, Gaming, Reading).</p>
 
-                <h4>👨🏾‍💻 IDE of Choice:</h4>
-                <p>Throughout the development process, I used PyCharm, Github Lens and no AI tools 😄 </p>
+                <h4>🔍 Phase 6: Spotlight Command Palette (Ctrl + K)</h4>
+                <p>Integrated a fast command palette modal accessible anywhere on the site via <code>Ctrl + K</code> or clicking the search trigger.</p>
 
-                <h3>If you want to see the code for this project, you can visit the associated Github page here:</h3>
+                <h3>If you want to see the code for this project, you can visit the associated GitHub repository:</h3>
                 <br>
                 <p><a href="https://github.com/Wassim-Hamra/Wassim-Hamra.github.io" target="_blank" role="button"
                       class="btn btn-primary btn-sm" rel="noopener noreferrer"><i class="icon-github2"></i> GitHub</a></p>
@@ -156,10 +152,8 @@
                                 <p>I created this website to showcase my work experience, projects, and skills
                                     as an AI engineer. While LinkedIn and other professional networks serve this
                                     purpose, I felt a personal website would offer more flexibility and allow me to
-                                    provide clearer descriptions of my projects. It’s also, in my opinion, a great way
-                                    to stand out from
-                                    the crowd and demonstrate that I can build solutions beyond my core field of
-                                    expertise.</p>
+                                    provide clearer descriptions of my projects. It’s also a great way to stand out
+                                    and demonstrate that I can build interactive web experiences beyond core ML.</p>
                             </div>
                         </div>
                     </div>
@@ -175,10 +169,11 @@
                         <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel"
                              aria-labelledby="headingTwo">
                             <div class="panel-body">
-                                <h4>Front-End </h4><p>HTML\CSS | JavaScript | Bootstrap | JQuery</p>
-                                <h4>Deployment </h4><p>GitHub Pages</p>
-                                <h4>Version Control </h4><p>git & GitHub</p>
-                                <h4>IDE </h4><p>Pycharm</p>
+                                <h4>Front-End </h4><p>HTML5 | Vanilla CSS & Glassmorphism | JavaScript | Bootstrap | jQuery</p>
+                                <h4>Dynamic Features</h4><p>Dynamic Dock | Lounge Audio Player | AI Chatbot Widget | Spotlight Search (Ctrl+K)</p>
+                                <h4>Deployment </h4><p>GitHub Pages (Custom Domain: wassimhamra.tech)</p>
+                                <h4>Version Control </h4><p>Git & GitHub</p>
+                                <h4>IDE </h4><p>PyCharm</p>
                             </div>
                         </div>
                     </div>
@@ -271,65 +266,62 @@
 <footer class="probootstrap-footer probootstrap-bg">
     <div class="container">
         <div class="row mb60">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="probootstrap-footer-widget">
-                    <h3 class="footer-brand-title">Wassim Hamra</h3>
-                    <div class="footer-status-pill">
-                        <span class="ai-chat-status-dot"></span> Available for Opportunities
-                    </div>
-                    <p class="footer-bio">Computer Engineering Student &amp; Applied AI Engineer passionate about building autonomous AI agents, LLM pipelines, and high-performance systems.</p>
-                    <a href="#" class="footer-cmd-btn" id="footer-cmd-trigger"><i class="icon-search"></i> Press <kbd>Ctrl K</kbd> to Search</a>
+                    <h4 class="heading">About This Website</h4>
+                    <p>This website was originally dynamic built with Django for the backend, but was later
+                        converted into a static website to take advantage of the free hosting on GitHub Pages.</p>
+                    <p><a href="project_website.html">Learn more...</a></p>
                 </div>
             </div>
-            
-            <div class="col-md-3 col-md-offset-1">
+            <div class="col-md-3">
                 <div class="probootstrap-footer-widget probootstrap-link-wrap">
-                    <h4 class="heading">Navigation</h4>
-                    <ul class="stack-link footer-nav-links">
-                        <li><a href="index.html"><i class="icon-chevron-right"></i> Home</a></li>
-                        <li><a href="about.html"><i class="icon-chevron-right"></i> About Me</a></li>
-                        <li><a href="projects.html"><i class="icon-chevron-right"></i> Projects</a></li>
-                        <li><a href="contact.html"><i class="icon-chevron-right"></i> Contact</a></li>
-                        <li><a href="https://drive.google.com/file/d/1e0lka_gm1ceTEtnZUaYaJGYqBprR7BHV/view?usp=sharing" target="_blank" rel="noopener noreferrer"><i class="icon-document2"></i> Download CV</a></li>
+                    <h4 class="heading">Quick Links</h4>
+                    <ul class="stack-link">
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="projects.html">Projects</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="probootstrap-footer-widget">
-                    <h4 class="heading">Get In Touch</h4>
-                    <ul class="footer-contact-list">
-                        <li>
-                            <i class="icon-mail"></i>
-                            <a href="mailto:wassimhamraa@gmail.com">wassimhamraa@gmail.com</a>
-                        </li>
-                        <li>
-                            <i class="icon-phone"></i>
-                            <a href="tel:+21698786241">+216 98 786 241</a>
-                        </li>
-                        <li>
-                            <i class="icon-location2"></i>
-                            <span>Tunis, Tunisia</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+                    <h4 class="heading">Contact Information</h4>
+                    <p>You can contact me via these outlets<br>Email:<strong> wassimhamraa@gmail.com</strong><br>
+                        Phone:<strong> +216 98 786 241</strong>
+                        <br> Location: <strong>Tunis, Tunisia</strong></p>
 
-        <div class="row copyright">
-            <div class="col-md-6 col-sm-6">
-                <div class="probootstrap-footer-widget">
-                    <p class="footer-copy-text">&copy; 2026 <strong>Wassim Hamra</strong>. Built with passion &amp; precision.</p>
+
                 </div>
             </div>
-            <div class="col-md-6 col-sm-6 text-right">
-                <div class="probootstrap-footer-widget footer-right-widget">
-                    <ul class="probootstrap-social footer-social-list">
-                        <li><a href="https://www.linkedin.com/in/medwassimhamra/" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="icon-linkedin"></i></a></li>
-                        <li><a href="https://github.com/Wassim-Hamra?tab=repositories" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="icon-github2"></i></a></li>
-                        <li><a href="mailto:wassimhamraa@gmail.com" target="_blank" rel="noopener noreferrer" title="Email"><i class="icon-mail"></i></a></li>
+
+
+        </div>
+        <div class="row copyright">
+            <div class="col-md-6">
+                <div class="probootstrap-footer-widget">
+                    <p>&copy; 2023 <a href="https://uicookies.com/" target="_blank" rel="noopener noreferrer">uiCookies:Black</a>
+                        | Developed by <a
+                                href="about.html">
+                            Wassim
+                            Hamra</a></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="probootstrap-footer-widget right">
+                    <ul class="probootstrap-social">
+                        <li><a href="https://www.linkedin.com/in/medwassimhamra/" target="_blank"
+                               rel="noopener noreferrer"><i class="icon-linkedin"></i></a></li>
+                        <li>
+                            <a href="https://mail.google.com/mail/u/1/#inbox?compose=CllgCJlLWMTNrnlgJRQcBgjLcHFkHPRxLwsnhRkrCNgtVXfsJZhPpWqTpMmjfNfXqNMrLRCbGSV"
+                               target="_blank" rel="noopener noreferrer"><i
+                                    class="icon-mail"></i></a></li>
+                        <li><a href="https://github.com/Wassim-Hamra?tab=repositories" target="_blank"
+                               rel="noopener noreferrer"><i
+                                class="icon-github2"></i></a></li>
                     </ul>
-                    <a href="#top" class="footer-back-to-top-btn" title="Back to Top"><i class="icon-chevron-up"></i></a>
                 </div>
             </div>
         </div>
