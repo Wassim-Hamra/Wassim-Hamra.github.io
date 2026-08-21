@@ -591,14 +591,23 @@
 
 /* Media Query for Mobile */
 @media screen and (max-width: 480px) {
+    /* Move chatbot to the RIGHT on mobile so it doesn't overlap the centered island */
     .ai-chat-widget {
-        bottom: 20px;
-        left: 20px;
+        bottom: 90px;   /* Lift above the island bar */
+        left: auto;
+        right: 16px;
+    }
+    .ai-chat-toggle {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
     }
     .ai-chat-window {
-        width: calc(100vw - 40px);
-        height: 460px;
-        bottom: 70px;
+        width: calc(100vw - 32px);
+        height: 430px;
+        bottom: 60px;
+        left: auto;
+        right: 0;
     }
     .dynamic-island-widget {
         bottom: 94px;
@@ -1149,11 +1158,38 @@
         padding: 0 16px;
     }
     .dynamic-island-widget.expanded .dynamic-island-capsule {
-        width: 92vw;
-        height: 102px;
-        padding: 14px 18px 16px 18px;
+        width: 95vw;
+        height: 94px;
+        padding: 10px 14px;
+    }
+    /* Mobile optimization for expanded content info */
+    .island-expanded-top {
+        font-size: 10px;
+        padding-bottom: 5px;
+        margin-bottom: 0px;
+    }
+    .lounge-track-title {
+        font-size: 12px;
+    }
+    .lounge-track-subtitle {
+        font-size: 9.5px;
+    }
+    .lounge-controls {
+        gap: 6px;
+    }
+    .lounge-btn {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        max-width: 28px !important;
+        max-height: 28px !important;
+        font-size: 10px;
     }
     .lounge-volume-slider {
-        width: 50px;
+        display: none !important;
+    }
+    .lounge-eq-bars {
+        display: none !important;
     }
 }
