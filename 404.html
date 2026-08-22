@@ -10,7 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="static/css/styles-merged.css">
     <link rel="stylesheet" href="static/css/style.min.css">
     <link rel="stylesheet" href="static/css/custom.css">
@@ -29,8 +29,10 @@
 </head>
 <body>
 
+<!-- START: loader -->
 <div class="probootstrap-loader"></div>
 
+<!-- START: header -->
 <header role="banner" class="probootstrap-header">
     <div class="container">
         <a href="index.html" class="probootstrap-logo">W<span>.Hamra</span></a>
@@ -69,34 +71,37 @@
         </nav>
     </div>
 </header>
+<!-- END: header -->
 
-<!-- 404 Hero Section -->
-<section class="error-404-section">
-    <div class="container">
-        <div class="error-404-content probootstrap-animate fadeInUp probootstrap-animated">
-            <div class="error-404-code">404</div>
-            <h1 class="error-404-title">Page Not Found</h1>
-            <p class="error-404-description">
-                The link you followed might be broken, or the page may have been removed. Let's get you back on track!
-            </p>
-            <div class="error-404-actions">
-                <a href="index.html" class="btn-primary-404">
-                    <i class="icon-home"></i> Back to Home
-                </a>
-                <a href="projects.html" class="btn-ghost-404">
-                    <i class="icon-folder"></i> Projects
-                </a>
-                <a href="about.html" class="btn-ghost-404">
-                    <i class="icon-user"></i> About Me
-                </a>
-                <a href="contact.html" class="btn-ghost-404">
-                    <i class="icon-mail"></i> Contact
-                </a>
+<!-- START: 404 Hero Slider -->
+<section class="probootstrap-slider flexslider">
+    <ul class="slides">
+        <li style="background-image: url('static/img/slider1.jpg');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        <div class="slides-text probootstrap-animate">
+                            <h1 style="font-size: 80px; font-weight: 700; color: #22eaaa; line-height: 1; margin: 0 0 10px 0; text-shadow: 0 0 35px rgba(34, 234, 170, 0.4);">404</h1>
+                            <h2><strong>Page Not Found</strong></h2>
+                            <p style="font-size: 16px; color: rgba(255, 255, 255, 0.75); max-width: 520px; margin: 10px auto 35px;">
+                                The link you followed might be broken, or the page may have been moved.
+                            </p>
+                            <p>
+                                <a href="index.html" class="btn btn-primary" style="margin: 6px;"><i class="icon-home" style="margin-right: 6px;"></i> Return Home</a>
+                                <a href="projects.html" class="btn btn-primary" style="margin: 6px;"><i class="icon-folder" style="margin-right: 6px;"></i> Projects</a>
+                                <a href="about.html" class="btn btn-primary" style="margin: 6px;"><i class="icon-user" style="margin-right: 6px;"></i> About</a>
+                                <a href="contact.html" class="btn btn-primary" style="margin: 6px;"><i class="icon-mail" style="margin-right: 6px;"></i> Contact</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+        </li>
+    </ul>
 </section>
+<!-- END: 404 Hero Slider -->
 
+<!-- START: footer -->
 <footer class="probootstrap-footer probootstrap-bg">
     <div class="container">
         <div class="row mb60">
@@ -150,6 +155,7 @@
         </div>
     </div>
 </footer>
+<!-- END: footer -->
 
 <div class="gototop js-top">
     <a href="#" class="js-gotop"><i class="icon-chevron-thin-up"></i></a>
