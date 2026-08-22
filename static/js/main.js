@@ -516,7 +516,11 @@
 
 	// Loading page
 	var loaderPage = function() {
-		$(".probootstrap-loader").fadeOut("slow");
+		if (sessionStorage.getItem('portfolioLoaded')) {
+			$(".probootstrap-loader").addClass('loaded').fadeOut("slow", function() {
+				$(this).remove();
+			});
+		}
 	};
 
 	var goToTop = function() {

@@ -14,6 +14,80 @@ var flexSlider = function() {
     controlNav: true
   });
 };
+var initPreloader = function() {
+  if (sessionStorage.getItem('portfolioLoaded')) {
+    // Already loaded, let main.js handle fading out probootstrap-loader normally
+    return;
+  }
+
+  var loaderEl = $(".probootstrap-loader");
+  if (loaderEl.length === 0) return;
+
+  var preloaderHtml = `
+    <div class="preloader-interactive-wrapper">
+      <img src="static/img/favicon/android-chrome-512x512.png" class="preloader-logo-img" alt="Wassim Hamra">
+      <h3 class="preloader-title">wassimhamra.tech</h3>
+      <div class="preloader-spinner-container" id="preloader-spinner-wrap">
+        <img src="static/img/preloader.gif" class="preloader-spinner-gif" alt="Loading...">
+        <span class="preloader-spinner-text">Loading...</span>
+      </div>
+      <button type="button" id="launch-portfolio-btn" class="preloader-btn">Enter</button>
+    </div>
+  `;
+  loaderEl.html(preloaderHtml);
+
+  // When window load completes (or page is ready), reveal launch button
+  $(window).on('load', function() {
+    setTimeout(function() {
+      $('#preloader-spinner-wrap').fadeOut(300, function() {
+        $('#launch-portfolio-btn').addClass('ready');
+      });
+    }, 600); // Small delay for smooth feel
+  });
+
+  // Fallback in case window load fired before this script
+  if (document.readyState === 'complete') {
+    setTimeout(function() {
+      if (!$('#launch-portfolio-btn').hasClass('ready')) {
+        $('#preloader-spinner-wrap').fadeOut(300, function() {
+          $('#launch-portfolio-btn').addClass('ready');
+        });
+      }
+    }, 600);
+  }
+
+  $('#launch-portfolio-btn').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    sessionStorage.setItem('portfolioLoaded', 'true');
+    loaderEl.addClass('loaded');
+    loaderEl.fadeOut("slow", function() {
+      loaderEl.remove();
+    });
+    
+    // Attempt playing the ambient lounge music on user interaction safely
+    var audio = $('#lounge-audio')[0];
+    if (audio) {
+      try {
+        var playPromise = audio.play();
+        if (playPromise !== undefined && typeof playPromise.then === 'function') {
+          playPromise.then(function() {
+            sessionStorage.setItem('loungeAudioState', 'playing');
+            $('#lounge-player-widget').addClass('playing');
+            $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
+          }).catch(function(err) {});
+        } else {
+          sessionStorage.setItem('loungeAudioState', 'playing');
+          $('#lounge-player-widget').addClass('playing');
+          $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
+        }
+      } catch (err) {}
+    }
+  });
+};
+
+
 $(document).ready(function() {
   flexSlider(); // Ensure this is called after DOM is loaded
   fetchGitHubRepos(); // Load GitHub repositories dynamically
@@ -23,6 +97,7 @@ $(document).ready(function() {
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
   initLoungeAudioPlayer(); // Initialize subtle lounge audio player
+  initPreloader(); // Run preloader to capture gesture and start audio
 });
 
 var fetchGitHubRepos = function() {
@@ -983,18 +1058,34 @@ var initLoungeAudioPlayer = function() {
 
   var playAudio = function() {
     applySavedTime();
-    audio.play().then(function() {
-      isPlaying = true;
-      widget.addClass('playing');
-      cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
-      sessionStorage.setItem('loungeAudioState', 'playing');
-    }).catch(function(e) {
+    try {
+      var playPromise = audio.play();
+      if (playPromise !== undefined && typeof playPromise.then === 'function') {
+        playPromise.then(function() {
+          isPlaying = true;
+          widget.addClass('playing');
+          cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
+          sessionStorage.setItem('loungeAudioState', 'playing');
+        }).catch(function(e) {
+          $(document).one('click scroll keydown touchstart', function() {
+            if (!isPlaying) {
+              playAudio();
+            }
+          });
+        });
+      } else {
+        isPlaying = true;
+        widget.addClass('playing');
+        cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
+        sessionStorage.setItem('loungeAudioState', 'playing');
+      }
+    } catch (e) {
       $(document).one('click scroll keydown touchstart', function() {
         if (!isPlaying) {
           playAudio();
         }
       });
-    });
+    }
   };
 
   var pauseAudio = function() {
