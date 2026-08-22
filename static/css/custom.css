@@ -612,10 +612,26 @@
     .dynamic-island-widget {
         bottom: 94px;
     }
-    /* Move go-to-top button to the LEFT on mobile to avoid overlapping the chatbot (right) and dynamic island (centre) */
+    /* Move go-to-top button higher to the LEFT and make it more compact on mobile */
     .gototop {
         right: auto !important;
         left: 16px !important;
+    }
+    .gototop.active {
+        bottom: 92px !important; /* Elevated above bottom edge */
+    }
+    .gototop a {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 4px !important;
+        background: rgba(18, 22, 28, 0.85) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    }
+    .gototop a i {
+        height: 36px !important;
+        font-size: 13px !important;
+        line-height: 36px !important;
     }
 }
 
