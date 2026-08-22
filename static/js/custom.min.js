@@ -953,11 +953,95 @@ var initLoungeAudioPlayer = function() {
   var currentPageName = currentPath.replace('.html', '') || 'home';
   if (currentPageName === 'index') currentPageName = 'home';
 
-  // Append page to flow if it's the start or a new navigation
   if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPageName) {
     pageFlow.push(currentPageName);
     sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
   }
+
+  // Track interaction actions
+  var recordAction = function(action) {
+    try {
+      var actions = JSON.parse(sessionStorage.getItem('portfolioActions') || '[]');
+      if (actions.indexOf(action) === -1) {
+        actions.push(action);
+        sessionStorage.setItem('portfolioActions', JSON.stringify(actions));
+      }
+    } catch (e) {}
+  };
+
+  // Track scroll depth
+  var trackScrollDepth = function() {
+    var docHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+    var scrollPct = docHeight > 0 ? Math.min(100, Math.round((window.scrollY / docHeight) * 100)) : 100;
+    var prevMax = parseInt(sessionStorage.getItem('portfolioMaxScroll') || '0', 10);
+    if (scrollPct > prevMax) {
+      sessionStorage.setItem('portfolioMaxScroll', scrollPct.toString());
+    }
+  };
+  $(window).on('scroll', trackScrollDepth);
+  setTimeout(trackScrollDepth, 500);
+
+  // Global benign interaction listeners
+  $(document).on('click', 'a[href*="linkedin.com"]', function() { recordAction("Viewed LinkedIn Profile"); });
+  $(document).on('click', 'a[href*="github.com"]', function() { recordAction("Viewed GitHub Profile/Repo"); });
+  $(document).on('click', 'a[href*="mail"], a[href*="compose"]', function() { recordAction("Clicked Contact Email"); });
+  $(document).on('click', '.btn-cool-cv', function() { recordAction("Viewed/Downloaded CV"); });
+  $(document).on('click', '#cmd-palette-btn', function() { recordAction("Used Command Palette (Ctrl+K)"); });
+  $(document).on('click', '#ai-chat-toggle-btn', function() { recordAction("Opened AI Chatbot"); });
+  $(document).on('click', '#lounge-island-capsule', function() { recordAction("Toggled Dynamic Island"); });
+
+  // Get clean referral source
+  var getCleanReferrer = function() {
+    var stored = sessionStorage.getItem('portfolioReferrer');
+    if (stored) return stored;
+    var ref = document.referrer;
+    if (!ref) {
+      stored = "Direct Entry / Bookmark";
+    } else if (ref.indexOf('linkedin.com') !== -1) {
+      stored = "LinkedIn (linkedin.com)";
+    } else if (ref.indexOf('github.com') !== -1) {
+      stored = "GitHub (github.com)";
+    } else if (ref.indexOf('google.') !== -1) {
+      stored = "Google Search";
+    } else if (ref.indexOf('t.co') !== -1 || ref.indexOf('twitter.com') !== -1 || ref.indexOf('x.com') !== -1) {
+      stored = "Twitter / X";
+    } else if (ref.indexOf('facebook.com') !== -1 || ref.indexOf('instagram.com') !== -1) {
+      stored = "Social Media";
+    } else {
+      try {
+        var u = new URL(ref);
+        stored = u.hostname;
+      } catch (e) {
+        stored = ref.substring(0, 50);
+      }
+    }
+    sessionStorage.setItem('portfolioReferrer', stored);
+    return stored;
+  };
+
+  // Get clean OS and Browser description
+  var getCleanDeviceDetails = function() {
+    var ua = navigator.userAgent;
+    var os = "Unknown OS";
+    if (/iPhone/i.test(ua)) os = "iPhone (iOS)";
+    else if (/iPad/i.test(ua)) os = "iPad (iPadOS)";
+    else if (/Android/i.test(ua)) os = "Android";
+    else if (/Mac OS X|macOS/i.test(ua)) os = "macOS";
+    else if (/Windows NT 10.0/i.test(ua)) os = "Windows 10/11";
+    else if (/Windows/i.test(ua)) os = "Windows";
+    else if (/Linux/i.test(ua)) os = "Linux";
+
+    var browser = "Browser";
+    if (/Edg\//i.test(ua)) browser = "Edge";
+    else if (/Chrome\//i.test(ua) && !/Edg\//i.test(ua)) browser = "Chrome";
+    else if (/Safari\//i.test(ua) && !/Chrome\//i.test(ua)) browser = "Safari";
+    else if (/Firefox\//i.test(ua)) browser = "Firefox";
+    else if (/SamsungBrowser/i.test(ua)) browser = "Samsung Internet";
+
+    var screenRes = window.screen ? (window.screen.width + "×" + window.screen.height) : "Unknown";
+    var isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+    return (isMobileDevice ? "📱 " : "🖥️ ") + os + " · " + browser + " (" + screenRes + ")";
+  };
 
   var sendWeb3Alert = function(country, isFinalUpdate) {
     var elapsedSeconds = Math.max(5, Math.round((Date.now() - sessionStartTime) / 1000));
@@ -971,9 +1055,17 @@ var initLoungeAudioPlayer = function() {
     } catch (e) { currentFlow = pageFlow; }
     var flowString = (currentFlow.length > 0 ? currentFlow : [currentPageName]).join(' → ');
 
-    var ua = navigator.userAgent;
-    var isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-    var deviceType = isMobileDevice ? '📱 Mobile' : '🖥️ Desktop';
+    var tz = "Unknown";
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch (e) {}
+    var lang = navigator.language || "en";
+    var referrer = getCleanReferrer();
+    var deviceDetails = getCleanDeviceDetails();
+
+    var actions = [];
+    try { actions = JSON.parse(sessionStorage.getItem('portfolioActions') || '[]'); } catch (e) {}
+    var actionsStr = actions.length > 0 ? actions.join(', ') : "Browsed pages";
+
+    var maxScroll = sessionStorage.getItem('portfolioMaxScroll') || "0";
     var timeStr = new Date().toLocaleString();
 
     var payload = {
@@ -981,15 +1073,17 @@ var initLoungeAudioPlayer = function() {
       subject: (isFinalUpdate ? '📊 Visitor Journey Complete: ' : '🔔 New Visitor Alert: ') + (country || 'Unknown') + ' (' + durationText + ')',
       from_name: 'Portfolio Visitor Alert',
       message:
-        '📍 Country: ' + (country || 'Unknown') + '\n' +
+        '📍 Location: ' + (country || 'Unknown') + ' (Timezone: ' + tz + ')\n' +
         '⏱️ Time on site: ' + durationText + '\n' +
         '🗺️ Page Flow: ' + flowString + '\n' +
-        '🕒 Time: ' + timeStr + '\n' +
-        '💻 Device: ' + deviceType + '\n' +
-        '🔎 User Agent: ' + ua
+        '🔗 Traffic Source: ' + referrer + '\n' +
+        '📜 Max Scroll Depth: ' + maxScroll + '%\n' +
+        '⚡ Actions Taken: ' + actionsStr + '\n' +
+        '💻 Device: ' + deviceDetails + '\n' +
+        '🌐 Language: ' + lang + '\n' +
+        '🕒 Visit Time: ' + timeStr
     };
 
-    // Modern fetch with keepalive ensures delivery even during mobile tab closes
     if (typeof fetch === 'function') {
       try {
         fetch('https://api.web3forms.com/submit', {
@@ -1020,7 +1114,7 @@ var initLoungeAudioPlayer = function() {
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
 
-    // Trigger 1: Send verified alert after 5 seconds on site (avoids 0-second bot hits)
+    // Trigger 1: Send verified alert after 5 seconds on site
     if (!sessionStorage.getItem('visitorNotified')) {
       setTimeout(function() {
         if (!sessionStorage.getItem('visitorNotified')) {
@@ -1030,7 +1124,7 @@ var initLoungeAudioPlayer = function() {
       }, 5000);
     }
 
-    // Trigger 2: When user departs after exploring multiple pages, send final journey summary
+    // Trigger 2: Send final journey summary on departure if they browsed multiple pages or spent > 30s
     var handleExit = function() {
       if (sessionStorage.getItem('visitorFinalNotified')) return;
       var flowCheck = [];
@@ -1038,7 +1132,6 @@ var initLoungeAudioPlayer = function() {
         flowCheck = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
       } catch (e) {}
 
-      // Only send journey exit email if they browsed 2+ pages or spent > 30 seconds
       var elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
       if (flowCheck.length > 1 || elapsed >= 30) {
         sessionStorage.setItem('visitorFinalNotified', 'true');
@@ -1046,7 +1139,6 @@ var initLoungeAudioPlayer = function() {
       }
     };
 
-    // Mobile-friendly lifecycle exit events (pagehide & visibilitychange)
     window.addEventListener('pagehide', handleExit, { capture: true });
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'hidden') {
