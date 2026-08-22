@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -20,6 +20,11 @@
     <link rel="stylesheet" href="static/css/styles-merged.css">
     <link rel="stylesheet" href="static/css/style.min.css">
     <link rel="stylesheet" href="static/css/custom.css">
+    <!-- Preload LCP image (first visible slider) -->
+    <link rel="preload" as="image" href="static/img/slider1.jpg">
+    <!-- Prefetch likely next pages for near-instant navigation -->
+    <link rel="prefetch" href="projects.html">
+    <link rel="prefetch" href="about.html">
 
     <!--[if lt IE 9]>
     <script src="static/js/vendor/html5shiv.min.js"></script>

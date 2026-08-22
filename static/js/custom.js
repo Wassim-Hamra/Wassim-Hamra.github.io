@@ -1,4 +1,4 @@
-jQuery(document).ready(function() {
+﻿jQuery(document).ready(function() {
 	
 	"use strict";
 
@@ -122,9 +122,9 @@ var fetchGitHubRepos = function() {
   ];
 
   var repoImages = {
-      "Transformer_PyTorch": "static/transformer.png",
-      "PathFinder": "static/pathfinder.png",
-      "Rust-Command-Shell": "static/terminal.png",
+      "Transformer_PyTorch": "static/transformer.jpg",
+      "PathFinder": "static/pathfinder.jpg",
+      "Rust-Command-Shell": "static/terminal.jpg",
       "Video-Transcription-Translation-AI-System": "static/ai-system.png",
       "Deepkit": "static/deepkit.png",
       "DeepKit": "static/deepkit.png",
@@ -147,7 +147,7 @@ var fetchGitHubRepos = function() {
           description: "A web application that uses predictive models to evaluate the risk for various diseases. Users input their health information, and they get personalized risk assessments and lifestyle recommendations to improve their health.",
           url: "under_development.html",
           linkText: "View details",
-          img: "static/img/healthcenter.png",
+          img: "static/img/healthcenter.jpg",
           imgStyle: "aspect-ratio: 16/9; object-fit: cover;",
           isInternal: true
       },
@@ -219,7 +219,7 @@ var fetchGitHubRepos = function() {
                   <div class="col-md-4 col-sm-6 probootstrap-animate fadeInUp probootstrap-animated" style="margin-bottom: 30px; display: flex;">
                       <div class="probootstrap-card" style="display: flex; flex-direction: column; width: 100%; height: 100%;">
                           <div class="probootstrap-card-media">
-                              <a href="${card.url}" ${targetAttr}><img src="${card.img}" class="img-responsive img-border" alt="${card.name}" style="${card.imgStyle}"></a>
+                              <a href="${card.url}" ${targetAttr}><img src="${card.img}" class="img-responsive img-border" alt="${card.name}" style="${card.imgStyle}" loading="lazy"></a>
                           </div>
                           <div class="probootstrap-card-text" style="display: flex; flex-direction: column; flex-grow: 1;">
                               <h2 class="probootstrap-card-heading mb0">${card.name}</h2>
