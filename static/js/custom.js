@@ -870,7 +870,7 @@ var initLoungeAudioPlayer = function() {
               <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
                 <i class="icon-volume-medium" id="lounge-mute-icon"></i>
               </button>
-              <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.08" title="Volume">
+              <input type="range" class="lounge-volume-slider" id="lounge-volume-slider" min="0" max="1" step="0.02" value="0.17" title="Volume">
             </div>
           </div>
         </div>
@@ -921,29 +921,81 @@ var initLoungeAudioPlayer = function() {
     return symbol + ' ' + Math.round(temp) + '°C';
   };
 
-  // Send email notification on new visitor entry via Web3Forms (Option 3)
+  // ─── Visitor Analytics & Notification ─────────────────────────────────────
+
+  // Common bot/crawler user-agent patterns — skip notification for these
+  var BOT_PATTERNS = [
+    /Googlebot/i, /bingbot/i, /Slurp/i, /DuckDuckBot/i, /Baiduspider/i,
+    /YandexBot/i, /Sogou/i, /Exabot/i, /facebot/i, /ia_archiver/i,
+    /AhrefsBot/i, /SemrushBot/i, /MJ12bot/i, /DotBot/i, /BLEXBot/i,
+    /PetalBot/i, /Applebot/i, /Bytespider/i, /GPTBot/i, /ChatGPT-User/i,
+    /Claude-Web/i, /anthropic-ai/i, /cohere-ai/i, /FacebookExternalHit/i,
+    /LinkedInBot/i, /Twitterbot/i, /WhatsApp/i, /Slackbot/i,
+    /python-requests/i, /curl\//i, /wget\//i, /libwww-perl/i,
+    /Go-http-client/i, /HeadlessChrome/i, /PhantomJS/i
+  ];
+
+  var isBot = BOT_PATTERNS.some(function(rx) {
+    return rx.test(navigator.userAgent);
+  });
+
+  // Track session start time
+  var sessionStartTime = Date.now();
+
+  // Track page navigation flow (stored across pages in sessionStorage)
+  var pageFlow = [];
+  try {
+    pageFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
+  } catch (e) { pageFlow = []; }
+
+  var currentPage = (window.location.pathname.split('/').pop() || 'index.html').replace('.html', '') || 'home';
+  // Avoid duplicating last page entry on refresh
+  if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPage) {
+    pageFlow.push(currentPage);
+  }
+  sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
+
+  // Send email notification on new visitor via Web3Forms — deferred to beforeunload
   var notifyVisitorEntry = function(country) {
-    if (sessionStorage.getItem('visitorNotified')) return;
-    sessionStorage.setItem('visitorNotified', 'true');
+    if (isBot) return; // Skip bots entirely
 
-    var page = window.location.pathname || 'index.html';
-    var timeStr = new Date().toLocaleString();
-    var userAgent = navigator.userAgent;
+    // Register beforeunload handler to fire the notification on actual departure
+    $(window).on('beforeunload.visitorNotify', function() {
+      var elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+      if (elapsed < 5) return; // Skip likely bots with < 5s sessions
 
-    $.ajax({
-      url: 'https://api.web3forms.com/submit',
-      method: 'POST',
-      dataType: 'json',
-      data: {
-        access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
-        subject: '🔔 New Portfolio Visitor Alert: ' + (country || 'Unknown Location'),
-        from_name: 'Portfolio Visitor Alert',
-        message: 'New visitor landed on your portfolio!\n\n' +
-                 '📍 Country: ' + (country || 'Unknown') + '\n' +
-                 '📄 Landing Page: ' + page + '\n' +
-                 '🕒 Time: ' + timeStr + '\n' +
-                 '💻 Device Info: ' + userAgent
-      }
+      // Build human-readable time string
+      var minutes = Math.floor(elapsed / 60);
+      var seconds = elapsed % 60;
+      var timeSpent = minutes > 0
+        ? minutes + 'm ' + seconds + 's'
+        : seconds + 's';
+
+      // Page flow formatted as "home → projects → about"
+      var flowStr = pageFlow.join(' → ');
+
+      var timeStr = new Date().toLocaleString();
+      var ua = navigator.userAgent;
+      var device = /Mobi|Android/i.test(ua) ? '📱 Mobile' : '🖥️ Desktop';
+
+      $.ajax({
+        url: 'https://api.web3forms.com/submit',
+        method: 'POST',
+        async: false, // beforeunload requires synchronous
+        dataType: 'json',
+        data: {
+          access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+          subject: '🔔 Portfolio Visit: ' + (country || 'Unknown') + ' · ' + timeSpent,
+          from_name: 'Portfolio Analytics',
+          message:
+            '📍 Country: ' + (country || 'Unknown') + '\n' +
+            '⏱️ Time on site: ' + timeSpent + '\n' +
+            '🗺️ Page flow: ' + flowStr + '\n' +
+            '🕒 Visit time: ' + timeStr + '\n' +
+            '💻 Device: ' + device + '\n' +
+            '🔎 User Agent: ' + ua
+        }
+      });
     });
   };
 
@@ -1018,8 +1070,8 @@ var initLoungeAudioPlayer = function() {
 
   fetchVisitorLocationAndWeather();
 
-  // Audio setup: Lower default volume (8%)
-  var defaultVol = 0.08;
+  // Audio setup: Default volume (17%)
+  var defaultVol = 0.17;
   audio.volume = defaultVol;
   volumeSlider.val(defaultVol);
 
