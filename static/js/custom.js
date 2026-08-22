@@ -1,4 +1,4 @@
-﻿jQuery(document).ready(function() {
+jQuery(document).ready(function() {
 	
 	"use strict";
 
@@ -923,79 +923,135 @@ var initLoungeAudioPlayer = function() {
 
   // ─── Visitor Analytics & Notification ─────────────────────────────────────
 
-  // Common bot/crawler user-agent patterns — skip notification for these
+  // Common automated bot & crawler patterns (safe against real mobile/desktop browsers)
   var BOT_PATTERNS = [
-    /Googlebot/i, /bingbot/i, /Slurp/i, /DuckDuckBot/i, /Baiduspider/i,
-    /YandexBot/i, /Sogou/i, /Exabot/i, /facebot/i, /ia_archiver/i,
-    /AhrefsBot/i, /SemrushBot/i, /MJ12bot/i, /DotBot/i, /BLEXBot/i,
-    /PetalBot/i, /Applebot/i, /Bytespider/i, /GPTBot/i, /ChatGPT-User/i,
-    /Claude-Web/i, /anthropic-ai/i, /cohere-ai/i, /FacebookExternalHit/i,
-    /LinkedInBot/i, /Twitterbot/i, /WhatsApp/i, /Slackbot/i,
-    /python-requests/i, /curl\//i, /wget\//i, /libwww-perl/i,
-    /Go-http-client/i, /HeadlessChrome/i, /PhantomJS/i
+    /Googlebot/i, /bingbot/i, /Baiduspider/i, /YandexBot/i,
+    /DuckDuckBot/i, /AhrefsBot/i, /SemrushBot/i, /MJ12bot/i,
+    /DotBot/i, /PetalBot/i, /Bytespider/i, /GPTBot/i, /ChatGPT-User/i,
+    /Claude-Web/i, /anthropic/i, /cohere/i, /HeadlessChrome/i, /PhantomJS/i,
+    /python-requests/i, /curl\//i, /wget\//i, /Go-http-client/i
   ];
 
   var isBot = BOT_PATTERNS.some(function(rx) {
     return rx.test(navigator.userAgent);
   });
 
-  // Track session start time
-  var sessionStartTime = Date.now();
+  // Track session start time across whole session
+  var sessionStartTime = parseInt(sessionStorage.getItem('portfolioSessionStart') || '0', 10);
+  if (!sessionStartTime) {
+    sessionStartTime = Date.now();
+    sessionStorage.setItem('portfolioSessionStart', sessionStartTime.toString());
+  }
 
-  // Track page navigation flow (stored across pages in sessionStorage)
+  // Track page navigation flow across the session
   var pageFlow = [];
   try {
     pageFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
   } catch (e) { pageFlow = []; }
 
-  var currentPage = (window.location.pathname.split('/').pop() || 'index.html').replace('.html', '') || 'home';
-  // Avoid duplicating last page entry on refresh
-  if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPage) {
-    pageFlow.push(currentPage);
+  var currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  var currentPageName = currentPath.replace('.html', '') || 'home';
+  if (currentPageName === 'index') currentPageName = 'home';
+
+  // Append page to flow if it's the start or a new navigation
+  if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPageName) {
+    pageFlow.push(currentPageName);
+    sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
   }
-  sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
 
-  // Send email notification on new visitor via Web3Forms — deferred to beforeunload
-  var notifyVisitorEntry = function(country) {
-    if (isBot) return; // Skip bots entirely
+  var sendWeb3Alert = function(country, isFinalUpdate) {
+    var elapsedSeconds = Math.max(5, Math.round((Date.now() - sessionStartTime) / 1000));
+    var mins = Math.floor(elapsedSeconds / 60);
+    var secs = elapsedSeconds % 60;
+    var durationText = mins > 0 ? mins + 'm ' + secs + 's' : secs + 's';
 
-    // Register beforeunload handler to fire the notification on actual departure
-    $(window).on('beforeunload.visitorNotify', function() {
-      var elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
-      if (elapsed < 5) return; // Skip likely bots with < 5s sessions
+    var currentFlow = [];
+    try {
+      currentFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
+    } catch (e) { currentFlow = pageFlow; }
+    var flowString = (currentFlow.length > 0 ? currentFlow : [currentPageName]).join(' → ');
 
-      // Build human-readable time string
-      var minutes = Math.floor(elapsed / 60);
-      var seconds = elapsed % 60;
-      var timeSpent = minutes > 0
-        ? minutes + 'm ' + seconds + 's'
-        : seconds + 's';
+    var ua = navigator.userAgent;
+    var isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+    var deviceType = isMobileDevice ? '📱 Mobile' : '🖥️ Desktop';
+    var timeStr = new Date().toLocaleString();
 
-      // Page flow formatted as "home → projects → about"
-      var flowStr = pageFlow.join(' → ');
+    var payload = {
+      access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+      subject: (isFinalUpdate ? '📊 Visitor Journey Complete: ' : '🔔 New Visitor Alert: ') + (country || 'Unknown') + ' (' + durationText + ')',
+      from_name: 'Portfolio Visitor Alert',
+      message:
+        '📍 Country: ' + (country || 'Unknown') + '\n' +
+        '⏱️ Time on site: ' + durationText + '\n' +
+        '🗺️ Page Flow: ' + flowString + '\n' +
+        '🕒 Time: ' + timeStr + '\n' +
+        '💻 Device: ' + deviceType + '\n' +
+        '🔎 User Agent: ' + ua
+    };
 
-      var timeStr = new Date().toLocaleString();
-      var ua = navigator.userAgent;
-      var device = /Mobi|Android/i.test(ua) ? '📱 Mobile' : '🖥️ Desktop';
-
+    // Modern fetch with keepalive ensures delivery even during mobile tab closes
+    if (typeof fetch === 'function') {
+      try {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+          keepalive: true
+        }).catch(function() {});
+      } catch (err) {
+        $.ajax({
+          url: 'https://api.web3forms.com/submit',
+          method: 'POST',
+          dataType: 'json',
+          data: payload
+        });
+      }
+    } else {
       $.ajax({
         url: 'https://api.web3forms.com/submit',
         method: 'POST',
-        async: false, // beforeunload requires synchronous
         dataType: 'json',
-        data: {
-          access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
-          subject: '🔔 Portfolio Visit: ' + (country || 'Unknown') + ' · ' + timeSpent,
-          from_name: 'Portfolio Analytics',
-          message:
-            '📍 Country: ' + (country || 'Unknown') + '\n' +
-            '⏱️ Time on site: ' + timeSpent + '\n' +
-            '🗺️ Page flow: ' + flowStr + '\n' +
-            '🕒 Visit time: ' + timeStr + '\n' +
-            '💻 Device: ' + device + '\n' +
-            '🔎 User Agent: ' + ua
-        }
+        data: payload
       });
+    }
+  };
+
+  // Send email notification on new visitor entry via Web3Forms
+  var notifyVisitorEntry = function(country) {
+    if (isBot) return;
+
+    // Trigger 1: Send verified alert after 5 seconds on site (avoids 0-second bot hits)
+    if (!sessionStorage.getItem('visitorNotified')) {
+      setTimeout(function() {
+        if (!sessionStorage.getItem('visitorNotified')) {
+          sessionStorage.setItem('visitorNotified', 'true');
+          sendWeb3Alert(country, false);
+        }
+      }, 5000);
+    }
+
+    // Trigger 2: When user departs after exploring multiple pages, send final journey summary
+    var handleExit = function() {
+      if (sessionStorage.getItem('visitorFinalNotified')) return;
+      var flowCheck = [];
+      try {
+        flowCheck = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
+      } catch (e) {}
+
+      // Only send journey exit email if they browsed 2+ pages or spent > 30 seconds
+      var elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
+      if (flowCheck.length > 1 || elapsed >= 30) {
+        sessionStorage.setItem('visitorFinalNotified', 'true');
+        sendWeb3Alert(country, true);
+      }
+    };
+
+    // Mobile-friendly lifecycle exit events (pagehide & visibilitychange)
+    window.addEventListener('pagehide', handleExit, { capture: true });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        handleExit();
+      }
     });
   };
 
