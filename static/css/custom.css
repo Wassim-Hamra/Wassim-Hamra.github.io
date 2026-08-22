@@ -1219,8 +1219,8 @@
    Minimal Interactive Preloader Overrides
    ========================================================================== */
 .probootstrap-loader {
-    /* Deep dark bg with visible green tint at the bottom matching the site slider feel */
-    background: linear-gradient(to bottom, #000000 40%, #020f09 100%) !important;
+    /* Rich ambient dark green gradient rising from the bottom */
+    background: radial-gradient(ellipse at 50% 100%, #0a422d 0%, #031c13 50%, #000000 85%) !important;
     display: flex;
     align-items: center;
     justify-content: center;
