@@ -31,9 +31,8 @@ var initPreloader = function() {
       <button type="button" id="entry-close-btn" class="entry-close-btn" aria-label="Close">×</button>
       <img src="static/img/favicon/android-chrome-512x512.png" class="preloader-logo-img" alt="Wassim Hamra">
       <h2 class="preloader-greeting">Hey There 👋</h2>
-      <p class="preloader-subtitle">Welcome! Click below to enter the site.</p>
       <div class="entry-actions">
-        <button type="button" id="launch-portfolio-btn" class="preloader-btn ready">Enter Site</button>
+        <button type="button" id="launch-portfolio-btn" class="preloader-btn ready">Enter</button>
       </div>
     </div>
   `;

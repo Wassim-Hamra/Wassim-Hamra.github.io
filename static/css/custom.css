@@ -1258,13 +1258,31 @@
    Minimal Interactive Preloader Overrides
    ========================================================================== */
 .probootstrap-loader {
-    /* Rich ambient dark green gradient rising from the bottom */
-    background: radial-gradient(ellipse at 50% 100%, #0a422d 0%, #031c13 50%, #000000 85%) !important;
+    background: transparent !important;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 9999999;
     transition: opacity 0.5s ease, visibility 0.5s ease;
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
+
+.probootstrap-loader::before {
+    content: "";
+    position: absolute;
+    inset: -20px;
+    background: url('../img/slider1.jpg') center center / cover no-repeat;
+    filter: blur(10px) saturate(115%);
+    transform: scale(1.06);
+}
+
+.probootstrap-loader::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(3, 20, 14, 0.56) 0%, rgba(4, 28, 20, 0.64) 100%);
 }
 
 .probootstrap-loader.loaded {
@@ -1290,6 +1308,7 @@
     -webkit-backdrop-filter: blur(18px) saturate(170%);
     box-sizing: border-box;
     position: relative;
+    z-index: 1;
 }
 
 .preloader-logo-img {
@@ -1329,13 +1348,6 @@
     font-weight: 700;
     color: #ecfff8;
     letter-spacing: 0.01em;
-}
-
-.preloader-subtitle {
-    margin: 0 0 18px 0;
-    color: #c8d7d2;
-    font-size: 13px;
-    line-height: 1.4;
 }
 
 .entry-actions {
@@ -1421,9 +1433,6 @@
     }
     .preloader-greeting {
         font-size: 26px;
-    }
-    .preloader-subtitle {
-        font-size: 12.5px;
     }
 }
 
