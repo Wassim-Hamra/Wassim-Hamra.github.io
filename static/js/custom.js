@@ -14,15 +14,6 @@ var flexSlider = function() {
     controlNav: true
   });
 };
-
-var navigateInternal = function(url) {
-  if (window.PJAX && typeof window.PJAX.navigate === 'function') {
-    window.PJAX.navigate(url);
-    return;
-  }
-  window.location.href = url;
-};
-
 var initPreloader = function() {
   var MUSIC_PREF_KEY = 'portfolioMusicPreference';
   var loaderEl = $(".probootstrap-loader");
@@ -95,23 +86,15 @@ var initPreloader = function() {
 
 
 $(document).ready(function() {
-  var runPageInitializers = function() {
-    flexSlider();
-    fetchGitHubRepos();
-    initContactForm();
-    initSkillBars();
-    initTimelineAnimation();
-  };
-
-  runPageInitializers();
-  initCommandPalette();
-  initAIChatbot();
-  initLoungeAudioPlayer();
-  initPreloader();
-
-  document.addEventListener('pjax:load', function() {
-    runPageInitializers();
-  });
+  flexSlider(); // Ensure this is called after DOM is loaded
+  fetchGitHubRepos(); // Load GitHub repositories dynamically
+  initContactForm(); // Initialize AJAX contact form
+  initCommandPalette(); // Initialize Command Palette (Ctrl+K)
+  initSkillBars(); // Animate technical skill progress bars
+  initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
+  initTimelineAnimation(); // Initialize scroll-animated timeline for about page
+  initLoungeAudioPlayer(); // Initialize subtle lounge audio player
+  initPreloader(); // Show full-screen entry overlay on first session load
 });
 
 var fetchGitHubRepos = function() {
@@ -280,7 +263,7 @@ var initContactForm = function() {
     })
     .done(function(response) {
       if (response.success) {
-        navigateInternal('message_sent.html');
+        window.location.href = 'message_sent.html';
       } else {
         alertBox.addClass('alert-danger').text(response.message || 'Something went wrong. Please try again.').fadeIn();
       }
@@ -325,10 +308,10 @@ var initCommandPalette = function() {
 
   var items = [
     // Navigation
-    { title: "Home Page", category: "Navigation", icon: "icon-home", action: function() { navigateInternal("index.html"); } },
-    { title: "Projects Page", category: "Navigation", icon: "icon-briefcase", action: function() { navigateInternal("projects.html"); } },
-    { title: "About Wassim", category: "Navigation", icon: "icon-user", action: function() { navigateInternal("about.html"); } },
-    { title: "Contact Form", category: "Navigation", icon: "icon-mail", action: function() { navigateInternal("contact.html"); } },
+    { title: "Home Page", category: "Navigation", icon: "icon-home", action: function() { window.location.href = "index.html"; } },
+    { title: "Projects Page", category: "Navigation", icon: "icon-briefcase", action: function() { window.location.href = "projects.html"; } },
+    { title: "About Wassim", category: "Navigation", icon: "icon-user", action: function() { window.location.href = "about.html"; } },
+    { title: "Contact Form", category: "Navigation", icon: "icon-mail", action: function() { window.location.href = "contact.html"; } },
 
     // Actions & Socials
     { title: "Copy Email (wassimhamraa@gmail.com)", category: "Action", icon: "icon-copy", action: function() { 
@@ -876,8 +859,7 @@ var initTimelineAnimation = function() {
   };
 
   // Bind events and check immediately
-  $(window).off('scroll.timeline resize.timeline');
-  $(window).on('scroll.timeline resize.timeline', checkScroll);
+  $(window).on('scroll resize', checkScroll);
   setTimeout(checkScroll, 100);
 };
 
@@ -1082,30 +1064,15 @@ var initLoungeAudioPlayer = function() {
     pageFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
   } catch (e) { pageFlow = []; }
 
-  var resolveCurrentPageName = function() {
-    var currentPath = window.location.pathname.split('/').pop() || 'index.html';
-    var pageName = currentPath.replace('.html', '') || 'home';
-    return pageName === 'index' ? 'home' : pageName;
-  };
+  var currentPath = window.location.pathname.split('/').pop() || 'index.html';
+  var currentPageName = currentPath.replace('.html', '') || 'home';
+  if (currentPageName === 'index') currentPageName = 'home';
 
-  var currentPageName = resolveCurrentPageName();
-  var registerCurrentPageView = function() {
-    flushCurrentPageDuration();
-    currentPageName = resolveCurrentPageName();
-    try {
-      pageFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
-    } catch (e) { pageFlow = []; }
-    if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPageName) {
-      pageFlow.push(currentPageName);
-      sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
-    }
-    sessionStorage.setItem(PAGE_ENTERED_AT_KEY, Date.now().toString());
-  };
-  registerCurrentPageView();
-
-  document.addEventListener('pjax:load', function() {
-    registerCurrentPageView();
-  });
+  if (pageFlow.length === 0 || pageFlow[pageFlow.length - 1] !== currentPageName) {
+    pageFlow.push(currentPageName);
+    sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
+  }
+  sessionStorage.setItem(PAGE_ENTERED_AT_KEY, Date.now().toString());
 
   // Track interaction actions
   var recordAction = function(action) {
@@ -1484,10 +1451,6 @@ var initLoungeAudioPlayer = function() {
     return until > Date.now();
   };
 
-  document.addEventListener('pjax:load', function() {
-    sessionStorage.removeItem(INTERNAL_NAV_UNTIL_KEY);
-  });
-
   // Mark in-site page transitions so they are not treated as session exits.
   document.addEventListener('click', function(e) {
     var target = e.target;
@@ -1497,13 +1460,9 @@ var initLoungeAudioPlayer = function() {
     }
   }, true);
 
-  var latestVisitorCountry = 'Earth';
-  var exitListenersBound = false;
-
   // Send one notification email per browser session via Web3Forms
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
-    if (country) latestVisitorCountry = country;
 
     var hasSent = function() {
       return sessionStorage.getItem('visitorNotified') === 'true';
@@ -1512,19 +1471,16 @@ var initLoungeAudioPlayer = function() {
       sessionStorage.setItem('visitorNotified', 'true');
     };
 
-    if (exitListenersBound) return;
-
     // Send once when the user actually exits the site session.
     var handleExit = function() {
       if (hasSent()) return;
       if (isInternalNavigationInProgress()) return;
       markSent();
-      sendWeb3Alert(latestVisitorCountry, true);
+      sendWeb3Alert(country, true);
     };
 
     window.addEventListener('pagehide', handleExit, { capture: true });
     window.addEventListener('beforeunload', handleExit, { capture: true });
-    exitListenersBound = true;
   };
 
   var applyGeoAndWeather = function(country, weatherText) {
