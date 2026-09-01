@@ -1079,7 +1079,11 @@ var initLoungeAudioPlayer = function() {
     try {
       currentFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
     } catch (e) { currentFlow = pageFlow; }
-    var flowString = (currentFlow.length > 0 ? currentFlow : [currentPageName]).join(' → ');
+    var flowForEmail = currentFlow.length > 0 ? currentFlow.slice() : [currentPageName];
+    if (isFinalUpdate && flowForEmail[flowForEmail.length - 1] !== 'exit') {
+      flowForEmail.push('exit');
+    }
+    var flowString = flowForEmail.join(' → ');
 
     var tz = "Unknown";
     try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch (e) {}
@@ -1136,6 +1140,41 @@ var initLoungeAudioPlayer = function() {
     }
   };
 
+  var INTERNAL_NAV_UNTIL_KEY = 'portfolioInternalNavUntil';
+  var INTERNAL_NAV_WINDOW_MS = 15000;
+
+  var isLikelyInternalLink = function(anchor) {
+    if (!anchor || !anchor.getAttribute) return false;
+    var href = anchor.getAttribute('href') || '';
+    if (!href || href === '#' || href.indexOf('javascript:') === 0) return false;
+    if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return false;
+
+    try {
+      var url = new URL(href, window.location.href);
+      return url.origin === window.location.origin;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  var markInternalNavigation = function() {
+    sessionStorage.setItem(INTERNAL_NAV_UNTIL_KEY, (Date.now() + INTERNAL_NAV_WINDOW_MS).toString());
+  };
+
+  var isInternalNavigationInProgress = function() {
+    var until = parseInt(sessionStorage.getItem(INTERNAL_NAV_UNTIL_KEY) || '0', 10);
+    return until > Date.now();
+  };
+
+  // Mark in-site page transitions so they are not treated as session exits.
+  document.addEventListener('click', function(e) {
+    var target = e.target;
+    var anchor = target && target.closest ? target.closest('a') : null;
+    if (isLikelyInternalLink(anchor)) {
+      markInternalNavigation();
+    }
+  }, true);
+
   // Send one notification email per browser session via Web3Forms
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
@@ -1147,20 +1186,12 @@ var initLoungeAudioPlayer = function() {
       sessionStorage.setItem('visitorNotified', 'true');
     };
 
-    // Trigger 1: send once after 5 seconds of active visit
-    var notifyTimer = setTimeout(function() {
-      if (!hasSent()) {
-        markSent();
-        sendWeb3Alert(country, false);
-      }
-    }, 5000);
-
-    // Trigger 2: fallback for short bounces (leave before 5s) - still send only once
+    // Send once when the user actually exits the site session.
     var handleExit = function() {
       if (hasSent()) return;
-      clearTimeout(notifyTimer);
+      if (isInternalNavigationInProgress()) return;
       markSent();
-      sendWeb3Alert(country, false);
+      sendWeb3Alert(country, true);
     };
 
     window.addEventListener('pagehide', handleExit, { capture: true });
