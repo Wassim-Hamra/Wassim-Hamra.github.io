@@ -969,6 +969,60 @@ var initLoungeAudioPlayer = function() {
     sessionStorage.setItem('portfolioSessionStart', sessionStartTime.toString());
   }
 
+  var ACTION_COUNTS_KEY = 'portfolioActionCounts';
+  var PAGE_DURATIONS_KEY = 'portfolioPageDurationsMs';
+  var PAGE_SCROLL_KEY = 'portfolioPageMaxScroll';
+  var PAGE_ENTERED_AT_KEY = 'portfolioCurrentPageEnteredAt';
+  var VISIT_MARKED_KEY = 'portfolioVisitMarked';
+  var SESSION_ID_KEY = 'portfolioSessionId';
+
+  var readSessionObject = function(key) {
+    try {
+      var raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  var writeSessionObject = function(key, value) {
+    sessionStorage.setItem(key, JSON.stringify(value));
+  };
+
+  var formatDuration = function(totalSeconds) {
+    var sec = Math.max(0, Math.round(totalSeconds));
+    var hrs = Math.floor(sec / 3600);
+    var mins = Math.floor((sec % 3600) / 60);
+    var rem = sec % 60;
+    if (hrs > 0) return hrs + 'h ' + mins + 'm ' + rem + 's';
+    if (mins > 0) return mins + 'm ' + rem + 's';
+    return rem + 's';
+  };
+
+  var addPageDuration = function(pageName, deltaMs) {
+    if (!pageName || !deltaMs || deltaMs <= 0) return;
+    var durations = readSessionObject(PAGE_DURATIONS_KEY);
+    var prev = parseInt(durations[pageName] || 0, 10);
+    durations[pageName] = prev + deltaMs;
+    writeSessionObject(PAGE_DURATIONS_KEY, durations);
+  };
+
+  var lastDurationFlushAt = 0;
+  var flushCurrentPageDuration = function() {
+    var now = Date.now();
+    if (now - lastDurationFlushAt < 250) return;
+    lastDurationFlushAt = now;
+
+    var enteredAt = parseInt(sessionStorage.getItem(PAGE_ENTERED_AT_KEY) || '0', 10);
+    if (!enteredAt) {
+      sessionStorage.setItem(PAGE_ENTERED_AT_KEY, now.toString());
+      return;
+    }
+
+    addPageDuration(currentPageName, now - enteredAt);
+    sessionStorage.setItem(PAGE_ENTERED_AT_KEY, now.toString());
+  };
+
   // Track page navigation flow across the session
   var pageFlow = [];
   try {
@@ -983,6 +1037,7 @@ var initLoungeAudioPlayer = function() {
     pageFlow.push(currentPageName);
     sessionStorage.setItem('visitorPageFlow', JSON.stringify(pageFlow));
   }
+  sessionStorage.setItem(PAGE_ENTERED_AT_KEY, Date.now().toString());
 
   // Track interaction actions
   var recordAction = function(action) {
@@ -992,6 +1047,10 @@ var initLoungeAudioPlayer = function() {
         actions.push(action);
         sessionStorage.setItem('portfolioActions', JSON.stringify(actions));
       }
+      var actionCounts = readSessionObject(ACTION_COUNTS_KEY);
+      var prevCount = parseInt(actionCounts[action] || 0, 10);
+      actionCounts[action] = prevCount + 1;
+      writeSessionObject(ACTION_COUNTS_KEY, actionCounts);
     } catch (e) {}
   };
 
@@ -1003,9 +1062,23 @@ var initLoungeAudioPlayer = function() {
     if (scrollPct > prevMax) {
       sessionStorage.setItem('portfolioMaxScroll', scrollPct.toString());
     }
+
+    var pageMaxScroll = readSessionObject(PAGE_SCROLL_KEY);
+    var prevPageMax = parseInt(pageMaxScroll[currentPageName] || '0', 10);
+    if (scrollPct > prevPageMax) {
+      pageMaxScroll[currentPageName] = scrollPct;
+      writeSessionObject(PAGE_SCROLL_KEY, pageMaxScroll);
+    }
   };
   $(window).on('scroll', trackScrollDepth);
   setTimeout(trackScrollDepth, 500);
+
+  window.addEventListener('pagehide', function() { flushCurrentPageDuration(); }, { capture: true });
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+      flushCurrentPageDuration();
+    }
+  });
 
   // Global benign interaction listeners
   $(document).on('click', 'a[href*="linkedin.com"]', function() { recordAction("Viewed LinkedIn Profile"); });
@@ -1015,6 +1088,17 @@ var initLoungeAudioPlayer = function() {
   $(document).on('click', '#cmd-palette-btn', function() { recordAction("Used Command Palette (Ctrl+K)"); });
   $(document).on('click', '#ai-chat-toggle-btn', function() { recordAction("Opened AI Chatbot"); });
   $(document).on('click', '#lounge-island-capsule', function() { recordAction("Toggled Dynamic Island"); });
+  $(document).on('click', '#github-repos-container .probootstrap-card a, #home-projects-container .probootstrap-card a', function() {
+    var projectName = $(this).closest('.probootstrap-card').find('.probootstrap-card-heading').first().text().trim();
+    recordAction(projectName ? ('Opened Project: ' + projectName) : 'Opened Project Card');
+  });
+  $(document).on('focusin', '#contact-form input, #contact-form textarea', function() {
+    if (!sessionStorage.getItem('portfolioContactFormStarted')) {
+      sessionStorage.setItem('portfolioContactFormStarted', 'true');
+      recordAction('Started Contact Form');
+    }
+  });
+  $(document).on('submit', '#contact-form', function() { recordAction('Submitted Contact Form'); });
 
   // Get clean referral source
   var getCleanReferrer = function() {
@@ -1046,7 +1130,7 @@ var initLoungeAudioPlayer = function() {
   };
 
   // Get clean OS and Browser description
-  var getCleanDeviceDetails = function() {
+  var getDeviceContext = function() {
     var ua = navigator.userAgent;
     var os = "Unknown OS";
     if (/iPhone/i.test(ua)) os = "iPhone (iOS)";
@@ -1066,14 +1150,27 @@ var initLoungeAudioPlayer = function() {
 
     var screenRes = window.screen ? (window.screen.width + "×" + window.screen.height) : "Unknown";
     var isMobileDevice = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-    return (isMobileDevice ? "📱 " : "🖥️ ") + os + " · " + browser + " (" + screenRes + ")";
+    return {
+      os: os,
+      browser: browser,
+      screen: screenRes,
+      is_mobile: isMobileDevice
+    };
+  };
+
+  var getNetworkContext = function() {
+    var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (!conn) return "unknown";
+    var type = conn.effectiveType || conn.type || "unknown";
+    var saveData = conn.saveData ? "save-data" : "normal";
+    return type + " (" + saveData + ")";
   };
 
   var sendWeb3Alert = function(country, isFinalUpdate) {
+    flushCurrentPageDuration();
+
     var elapsedSeconds = Math.max(5, Math.round((Date.now() - sessionStartTime) / 1000));
-    var mins = Math.floor(elapsedSeconds / 60);
-    var secs = elapsedSeconds % 60;
-    var durationText = mins > 0 ? mins + 'm ' + secs + 's' : secs + 's';
+    var durationText = formatDuration(elapsedSeconds);
 
     var currentFlow = [];
     try {
@@ -1089,29 +1186,101 @@ var initLoungeAudioPlayer = function() {
     try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Unknown"; } catch (e) {}
     var lang = navigator.language || "en";
     var referrer = getCleanReferrer();
-    var deviceDetails = getCleanDeviceDetails();
+    var device = getDeviceContext();
+    var network = getNetworkContext();
 
     var actions = [];
     try { actions = JSON.parse(sessionStorage.getItem('portfolioActions') || '[]'); } catch (e) {}
-    var actionsStr = actions.length > 0 ? actions.join(', ') : "Browsed pages";
+    var actionCounts = readSessionObject(ACTION_COUNTS_KEY);
 
     var maxScroll = sessionStorage.getItem('portfolioMaxScroll') || "0";
     var timeStr = new Date().toLocaleString();
+    var pageScroll = readSessionObject(PAGE_SCROLL_KEY);
+    var pageDurationsMs = readSessionObject(PAGE_DURATIONS_KEY);
+    var pageDurationsSeconds = {};
+    var pageDurationsHuman = {};
+    Object.keys(pageDurationsMs).forEach(function(page) {
+      var sec = Math.max(0, Math.round((parseInt(pageDurationsMs[page] || 0, 10)) / 1000));
+      pageDurationsSeconds[page] = sec;
+      pageDurationsHuman[page] = formatDuration(sec);
+    });
+
+    var sessionId = sessionStorage.getItem(SESSION_ID_KEY);
+    if (!sessionId) {
+      sessionId = 'sess_' + sessionStartTime + '_' + Math.random().toString(36).slice(2, 8);
+      sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    }
+
+    var visitCount = 1;
+    try {
+      visitCount = parseInt(localStorage.getItem('portfolioVisitCount') || '0', 10);
+      if (!sessionStorage.getItem(VISIT_MARKED_KEY)) {
+        visitCount += 1;
+        localStorage.setItem('portfolioVisitCount', visitCount.toString());
+        sessionStorage.setItem(VISIT_MARKED_KEY, 'true');
+      }
+      if (!visitCount || visitCount < 1) visitCount = 1;
+    } catch (e) {
+      visitCount = 1;
+    }
+
+    var geoData = readSessionObject('visitorGeoData');
+    var analyticsReport = {
+      schema_version: "v1",
+      generated_at: new Date().toISOString(),
+      session: {
+        id: sessionId,
+        started_at: new Date(sessionStartTime).toISOString(),
+        ended_at: new Date().toISOString(),
+        duration_seconds: elapsedSeconds,
+        duration_human: durationText,
+        visitor_type: visitCount > 1 ? "returning" : "new",
+        visit_count: visitCount
+      },
+      journey: {
+        entry_page: flowForEmail[0] || currentPageName,
+        exit_page: flowForEmail[flowForEmail.length - 1] || currentPageName,
+        page_flow: flowForEmail,
+        page_flow_text: flowString,
+        pages_viewed: flowForEmail.filter(function(x) { return x !== 'exit'; }).length,
+        page_durations_seconds: pageDurationsSeconds,
+        page_durations_human: pageDurationsHuman
+      },
+      engagement: {
+        max_scroll_percent: parseInt(maxScroll, 10) || 0,
+        max_scroll_by_page_percent: pageScroll,
+        actions_unique: actions,
+        action_counts: actionCounts,
+        cta_funnel: {
+          cv_clicks: parseInt(actionCounts['Viewed/Downloaded CV'] || 0, 10),
+          github_clicks: parseInt(actionCounts['Viewed GitHub Profile/Repo'] || 0, 10),
+          linkedin_clicks: parseInt(actionCounts['Viewed LinkedIn Profile'] || 0, 10),
+          contact_email_clicks: parseInt(actionCounts['Clicked Contact Email'] || 0, 10),
+          contact_form_started: parseInt(actionCounts['Started Contact Form'] || 0, 10),
+          contact_form_submitted: parseInt(actionCounts['Submitted Contact Form'] || 0, 10),
+          ai_chat_opens: parseInt(actionCounts['Opened AI Chatbot'] || 0, 10)
+        }
+      },
+      context: {
+        country: country || "Unknown",
+        weather: geoData.weatherText || "",
+        timezone: tz,
+        language: lang,
+        traffic_source: referrer,
+        network: network,
+        device: device,
+        visit_time_local: timeStr
+      }
+    };
 
     var payload = {
       access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
-      subject: (isFinalUpdate ? '📊 Visitor Journey Complete: ' : '🔔 New Visitor Alert: ') + (country || 'Unknown') + ' (' + durationText + ')',
+      subject: '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')',
       from_name: 'Portfolio Visitor Alert',
-      message:
-        '📍 Location: ' + (country || 'Unknown') + ' (Timezone: ' + tz + ')\n' +
-        '⏱️ Time on site: ' + durationText + '\n' +
-        '🗺️ Page Flow: ' + flowString + '\n' +
-        '🔗 Traffic Source: ' + referrer + '\n' +
-        '📜 Max Scroll Depth: ' + maxScroll + '%\n' +
-        '⚡ Actions Taken: ' + actionsStr + '\n' +
-        '💻 Device: ' + deviceDetails + '\n' +
-        '🌐 Language: ' + lang + '\n' +
-        '🕒 Visit Time: ' + timeStr
+      message: JSON.stringify(analyticsReport, null, 2),
+      schema_version: analyticsReport.schema_version,
+      session_id: sessionId,
+      flow: flowString
     };
 
     if (typeof fetch === 'function') {
@@ -1141,7 +1310,12 @@ var initLoungeAudioPlayer = function() {
   };
 
   var INTERNAL_NAV_UNTIL_KEY = 'portfolioInternalNavUntil';
-  var INTERNAL_NAV_WINDOW_MS = 15000;
+  var INTERNAL_NAV_WINDOW_MS = 4000;
+  var navUntilAtBoot = parseInt(sessionStorage.getItem(INTERNAL_NAV_UNTIL_KEY) || '0', 10);
+  if (navUntilAtBoot > Date.now()) {
+    // Previous page marked an internal navigation; clear it once the next page has loaded.
+    sessionStorage.removeItem(INTERNAL_NAV_UNTIL_KEY);
+  }
 
   var isLikelyInternalLink = function(anchor) {
     if (!anchor || !anchor.getAttribute) return false;
