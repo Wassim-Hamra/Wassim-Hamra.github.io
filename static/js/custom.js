@@ -1273,11 +1273,82 @@ var initLoungeAudioPlayer = function() {
       }
     };
 
+    var formatObjectLines = function(obj, suffix) {
+      var keys = Object.keys(obj || {});
+      if (keys.length === 0) return ['- none'];
+      keys.sort();
+      return keys.map(function(key) {
+        return '- ' + key + ': ' + obj[key] + (suffix || '');
+      });
+    };
+
+    var formatActionCountLines = function(obj) {
+      var keys = Object.keys(obj || {});
+      if (keys.length === 0) return ['- none'];
+      keys.sort(function(a, b) {
+        return (parseInt(obj[b] || 0, 10) - parseInt(obj[a] || 0, 10));
+      });
+      return keys.map(function(key) {
+        return '- ' + key + ': ' + (parseInt(obj[key] || 0, 10));
+      });
+    };
+
+    var emailLines = [
+      'Visitor Analytics Report',
+      '========================',
+      '',
+      'Session',
+      '- ID: ' + analyticsReport.session.id,
+      '- Visitor type: ' + analyticsReport.session.visitor_type + ' (visit #' + analyticsReport.session.visit_count + ')',
+      '- Duration: ' + analyticsReport.session.duration_human + ' (' + analyticsReport.session.duration_seconds + 's)',
+      '- Started at: ' + analyticsReport.session.started_at,
+      '- Ended at: ' + analyticsReport.session.ended_at,
+      '',
+      'Journey',
+      '- Entry page: ' + analyticsReport.journey.entry_page,
+      '- Exit page: ' + analyticsReport.journey.exit_page,
+      '- Flow: ' + analyticsReport.journey.page_flow_text,
+      '- Pages viewed: ' + analyticsReport.journey.pages_viewed,
+      '',
+      'Page dwell time',
+      formatObjectLines(analyticsReport.journey.page_durations_human, '').join('\n'),
+      '',
+      'Engagement',
+      '- Max scroll (session): ' + analyticsReport.engagement.max_scroll_percent + '%',
+      '',
+      'Max scroll by page',
+      formatObjectLines(analyticsReport.engagement.max_scroll_by_page_percent, '%').join('\n'),
+      '',
+      'Actions (count)',
+      formatActionCountLines(analyticsReport.engagement.action_counts).join('\n'),
+      '',
+      'CTA funnel',
+      '- CV clicks: ' + analyticsReport.engagement.cta_funnel.cv_clicks,
+      '- GitHub clicks: ' + analyticsReport.engagement.cta_funnel.github_clicks,
+      '- LinkedIn clicks: ' + analyticsReport.engagement.cta_funnel.linkedin_clicks,
+      '- Contact email clicks: ' + analyticsReport.engagement.cta_funnel.contact_email_clicks,
+      '- Contact form started: ' + analyticsReport.engagement.cta_funnel.contact_form_started,
+      '- Contact form submitted: ' + analyticsReport.engagement.cta_funnel.contact_form_submitted,
+      '- AI chat opens: ' + analyticsReport.engagement.cta_funnel.ai_chat_opens,
+      '',
+      'Context',
+      '- Country: ' + analyticsReport.context.country,
+      '- Weather: ' + (analyticsReport.context.weather || 'N/A'),
+      '- Timezone: ' + analyticsReport.context.timezone,
+      '- Language: ' + analyticsReport.context.language,
+      '- Source: ' + analyticsReport.context.traffic_source,
+      '- Network: ' + analyticsReport.context.network,
+      '- Device: ' + (analyticsReport.context.device.is_mobile ? 'mobile' : 'desktop') + ' | ' + analyticsReport.context.device.os + ' | ' + analyticsReport.context.device.browser + ' | ' + analyticsReport.context.device.screen,
+      '- Local visit time: ' + analyticsReport.context.visit_time_local
+    ];
+
+    var emailMessage = emailLines.join('\n');
+
     var payload = {
       access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
       subject: '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')',
       from_name: 'Portfolio Visitor Alert',
-      message: JSON.stringify(analyticsReport, null, 2),
+      message: emailMessage,
       schema_version: analyticsReport.schema_version,
       session_id: sessionId,
       flow: flowString
