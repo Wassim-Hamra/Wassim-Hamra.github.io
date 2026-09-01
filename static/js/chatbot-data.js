@@ -34,7 +34,7 @@ window.PORTFOLIO_CHATBOT_DATA = {
 {
 "id": "biggest_weakness",
 "question": "What's a weakness you're working on?",
-"answer": "I can be overly ambitious and sometimes try to push a project much further than the original scope. I've been learning to distinguish between what is technically interesting and what actually creates the most value, especially under time constraints.",
+"answer": "A real weakness for me is motivation fit: I can get demotivated if I'm working on very small-scope tasks with zero stakes, especially when I know nobody will actually use what I'm building. Another one is that I'm highly independent and I naturally dislike micromanagement — I do my best work when I'm given clear objectives, freedom to execute, and ownership of the project.",
 "tags": ["weaknesses", "growth", "self-awareness"],
 "tone": "professional"
 },
@@ -535,4 +535,3 @@ window.PORTFOLIO_CHATBOT_DATA = {
 ],
 "fallback_answer": "I can answer questions about Wassim's background, career, technical skills, AI work, projects, internships, interests, and personality. For anything very specific that isn't covered here, the best route is to contact Wassim directly through the portfolio's contact information."
 };
-
