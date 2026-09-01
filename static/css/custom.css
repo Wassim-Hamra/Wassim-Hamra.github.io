@@ -1274,7 +1274,7 @@
     position: absolute;
     inset: -20px;
     background: url('../img/slider1.jpg') center center / cover no-repeat;
-    filter: blur(10px) saturate(115%);
+    filter: blur(8.5px) saturate(108%);
     transform: scale(1.06);
 }
 
@@ -1293,8 +1293,8 @@
 }
 
 .preloader-interactive-wrapper {
-    background: linear-gradient(135deg, rgba(8, 48, 36, 0.58), rgba(13, 22, 18, 0.62));
-    border: 1px solid rgba(34, 234, 170, 0.36);
+    background: linear-gradient(135deg, rgba(12, 34, 28, 0.62), rgba(14, 23, 20, 0.66));
+    border: 1px solid rgba(136, 176, 161, 0.26);
     border-radius: 18px;
     padding: 28px 26px 24px 26px;
     width: 420px;
@@ -1303,9 +1303,9 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 28px rgba(34, 234, 170, 0.22);
-    backdrop-filter: blur(18px) saturate(170%);
-    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: 0 20px 42px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px) saturate(130%);
+    -webkit-backdrop-filter: blur(15px) saturate(130%);
     box-sizing: border-box;
     position: relative;
     z-index: 1;
@@ -1343,7 +1343,7 @@
 }
 
 .preloader-greeting {
-    margin: 14px 0 8px 0;
+    margin: 14px 0 0 0;
     font-size: 31px;
     font-weight: 700;
     color: #ecfff8;
@@ -1353,6 +1353,7 @@
 .entry-actions {
     display: flex;
     justify-content: center;
+    margin-top: 22px;
 }
 
 .preloader-title {
@@ -1390,9 +1391,9 @@
 .probootstrap-loader .preloader-btn {
     display: none;
     opacity: 0;
-    background: #22eaaa !important;
-    border: 2px solid #22eaaa !important;
-    color: #ffffff !important;
+    background: rgba(64, 128, 107, 0.72) !important;
+    border: 2px solid rgba(109, 161, 144, 0.72) !important;
+    color: #edf4f1 !important;
     padding: 10px 26px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
@@ -1419,8 +1420,8 @@
 .probootstrap-loader .preloader-btn:hover,
 .probootstrap-loader .preloader-btn:active,
 .probootstrap-loader .preloader-btn:focus {
-    background: #39ecb3 !important;
-    border-color: #39ecb3 !important;
+    background: rgba(76, 143, 122, 0.8) !important;
+    border-color: rgba(126, 178, 161, 0.82) !important;
     color: #ffffff !important;
     outline: none !important;
     box-shadow: none !important;
@@ -1443,7 +1444,6 @@
 .btn-primary,
 .btn.btn-primary,
 .btn-cool-cv,
-.probootstrap-loader .preloader-btn,
 input[type="submit"].btn.btn-primary {
     background: #22eaaa !important;
     border: 2px solid #22eaaa !important;
@@ -1478,9 +1478,6 @@ input[type="submit"].btn.btn-primary {
 .btn-cool-cv:hover,
 .btn-cool-cv:focus,
 .btn-cool-cv:active,
-.probootstrap-loader .preloader-btn:hover,
-.probootstrap-loader .preloader-btn:focus,
-.probootstrap-loader .preloader-btn:active,
 input[type="submit"].btn.btn-primary:hover,
 input[type="submit"].btn.btn-primary:focus,
 input[type="submit"].btn.btn-primary:active {
