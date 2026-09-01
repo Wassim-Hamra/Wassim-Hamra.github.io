@@ -17,6 +17,15 @@ var flexSlider = function() {
 var initPreloader = function() {
   var PANEL_DISMISSED_KEY = 'portfolioSoundPanelDismissed';
   var MUSIC_PREF_KEY = 'portfolioMusicPreference';
+  var loaderEl = $(".probootstrap-loader");
+
+  // Keep legacy loader logic compatible: always mark loaded and dismiss overlay.
+  sessionStorage.setItem('portfolioLoaded', 'true');
+  if (loaderEl.length > 0) {
+    loaderEl.addClass('loaded').fadeOut("slow", function() {
+      $(this).remove();
+    });
+  }
 
   if (sessionStorage.getItem('loungeAudioState') === 'paused') return;
   if (sessionStorage.getItem(PANEL_DISMISSED_KEY) === 'true') return;
