@@ -15,49 +15,35 @@ var flexSlider = function() {
   });
 };
 var initPreloader = function() {
-  var PANEL_DISMISSED_KEY = 'portfolioSoundPanelDismissed';
   var MUSIC_PREF_KEY = 'portfolioMusicPreference';
   var loaderEl = $(".probootstrap-loader");
 
-  // Keep legacy loader logic compatible: always mark loaded and dismiss overlay.
-  sessionStorage.setItem('portfolioLoaded', 'true');
-  if (loaderEl.length > 0) {
+  if (loaderEl.length === 0) return;
+  if (sessionStorage.getItem('portfolioLoaded')) {
     loaderEl.addClass('loaded').fadeOut("slow", function() {
       $(this).remove();
     });
+    return;
   }
 
-  if (sessionStorage.getItem('loungeAudioState') === 'paused') return;
-  if (sessionStorage.getItem(PANEL_DISMISSED_KEY) === 'true') return;
-
-  var pref = '';
-  try {
-    pref = localStorage.getItem(MUSIC_PREF_KEY) || '';
-  } catch (e) {}
-  if (pref === 'enabled') return;
-
-  var panelHtml = `
-    <div class="sound-consent-panel" id="sound-consent-panel" role="status" aria-live="polite">
-      <div class="sound-consent-dot"></div>
-      <div class="sound-consent-copy">
-        <div class="sound-consent-title">Enable ambient sound?</div>
-        <div class="sound-consent-subtitle">Smooth lounge audio for a better browsing vibe.</div>
-      </div>
-      <div class="sound-consent-actions">
-        <button type="button" id="sound-enable-btn" class="sound-consent-btn is-primary">Enable</button>
-        <button type="button" id="sound-later-btn" class="sound-consent-btn">Not now</button>
+  var preloaderHtml = `
+    <div class="preloader-interactive-wrapper entry-overlay-card">
+      <button type="button" id="entry-close-btn" class="entry-close-btn" aria-label="Close">×</button>
+      <img src="static/img/favicon/android-chrome-512x512.png" class="preloader-logo-img" alt="Wassim Hamra">
+      <h2 class="preloader-greeting">Hey There 👋</h2>
+      <p class="preloader-subtitle">Welcome! Click below to enter the site.</p>
+      <div class="entry-actions">
+        <button type="button" id="launch-portfolio-btn" class="preloader-btn ready">Enter Site</button>
       </div>
     </div>
   `;
-  $('body').append(panelHtml);
+  loaderEl.html(preloaderHtml);
 
-  var panel = $('#sound-consent-panel');
-  setTimeout(function() { panel.addClass('visible'); }, 80);
-
-  var closePanel = function() {
-    sessionStorage.setItem(PANEL_DISMISSED_KEY, 'true');
-    panel.removeClass('visible');
-    setTimeout(function() { panel.remove(); }, 220);
+  var closeOverlay = function() {
+    sessionStorage.setItem('portfolioLoaded', 'true');
+    loaderEl.addClass('loaded').fadeOut("slow", function() {
+      $(this).remove();
+    });
   };
 
   var setPlayingUIState = function() {
@@ -66,37 +52,36 @@ var initPreloader = function() {
     $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
   };
 
-  $('#sound-enable-btn').on('click', function(e) {
+  $('#launch-portfolio-btn').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
+
     try { localStorage.setItem(MUSIC_PREF_KEY, 'enabled'); } catch (err) {}
     var audio = $('#lounge-audio')[0];
-    if (!audio) {
-      closePanel();
-      return;
-    }
+    closeOverlay();
+    if (!audio) return;
+
     try {
       var playPromise = audio.play();
       if (playPromise !== undefined && typeof playPromise.then === 'function') {
         playPromise.then(function() {
           setPlayingUIState();
-          closePanel();
         }).catch(function() {
-          closePanel();
+          sessionStorage.setItem('loungeAudioState', 'paused');
         });
       } else {
         setPlayingUIState();
-        closePanel();
       }
     } catch (err) {
-      closePanel();
+      sessionStorage.setItem('loungeAudioState', 'paused');
     }
   });
 
-  $('#sound-later-btn').on('click', function(e) {
+  $('#entry-close-btn').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    closePanel();
+    sessionStorage.setItem('loungeAudioState', 'paused');
+    closeOverlay();
   });
 };
 
@@ -110,7 +95,7 @@ $(document).ready(function() {
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
   initLoungeAudioPlayer(); // Initialize subtle lounge audio player
-  initPreloader(); // Show soft sound-consent panel for first-time visitors
+  initPreloader(); // Show full-screen entry overlay on first session load
 });
 
 var fetchGitHubRepos = function() {

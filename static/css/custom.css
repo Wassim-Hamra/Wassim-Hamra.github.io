@@ -1275,18 +1275,21 @@
 }
 
 .preloader-interactive-wrapper {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    padding: 32px 28px 28px 28px;
-    width: 300px;
-    max-width: 88vw;
+    background: linear-gradient(135deg, rgba(8, 48, 36, 0.58), rgba(13, 22, 18, 0.62));
+    border: 1px solid rgba(34, 234, 170, 0.36);
+    border-radius: 18px;
+    padding: 28px 26px 24px 26px;
+    width: 420px;
+    max-width: calc(100vw - 28px);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 28px rgba(34, 234, 170, 0.22);
+    backdrop-filter: blur(18px) saturate(170%);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
     box-sizing: border-box;
+    position: relative;
 }
 
 .preloader-logo-img {
@@ -1295,6 +1298,49 @@
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.12);
     object-fit: contain;
+}
+
+.entry-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #dbe6e3;
+    width: 26px;
+    height: 26px;
+    line-height: 22px;
+    border-radius: 999px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.entry-close-btn:hover,
+.entry-close-btn:focus {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    outline: none;
+}
+
+.preloader-greeting {
+    margin: 14px 0 8px 0;
+    font-size: 31px;
+    font-weight: 700;
+    color: #ecfff8;
+    letter-spacing: 0.01em;
+}
+
+.preloader-subtitle {
+    margin: 0 0 18px 0;
+    color: #c8d7d2;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.entry-actions {
+    display: flex;
+    justify-content: center;
 }
 
 .preloader-title {
@@ -1368,115 +1414,16 @@
     box-shadow: none !important;
 }
 
-/* Soft Sound Consent Panel (replaces full welcome gate) */
-.sound-consent-panel {
-    position: fixed;
-    left: 50%;
-    bottom: 84px;
-    transform: translateX(-50%) translateY(10px);
-    width: min(620px, calc(100vw - 28px));
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 18px;
-    background: linear-gradient(120deg, rgba(8, 48, 36, 0.58), rgba(16, 28, 24, 0.5));
-    border: 1px solid rgba(34, 234, 170, 0.36);
-    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 24px rgba(34, 234, 170, 0.18);
-    backdrop-filter: blur(16px) saturate(165%);
-    -webkit-backdrop-filter: blur(16px) saturate(165%);
-    z-index: 100001;
-    opacity: 0;
-    transition: transform 0.22s ease, opacity 0.22s ease;
-    pointer-events: none;
-}
-
-.sound-consent-panel.visible {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.sound-consent-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: #22eaaa;
-    box-shadow: 0 0 12px rgba(34, 234, 170, 0.7);
-    flex-shrink: 0;
-}
-
-.sound-consent-copy {
-    flex: 1;
-    min-width: 0;
-}
-
-.sound-consent-title {
-    color: #ffffff;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-.sound-consent-subtitle {
-    color: #b8c4c2;
-    font-size: 11.5px;
-    line-height: 1.3;
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.sound-consent-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.sound-consent-btn {
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.08);
-    color: #e6f4ef;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 999px;
-    padding: 7px 12px;
-    line-height: 1;
-    transition: all 0.18s ease;
-    cursor: pointer;
-}
-
-.sound-consent-btn:hover,
-.sound-consent-btn:focus {
-    background: rgba(255, 255, 255, 0.16);
-    color: #ffffff;
-    outline: none;
-}
-
-.sound-consent-btn.is-primary {
-    border-color: rgba(34, 234, 170, 0.75);
-    background: rgba(34, 234, 170, 0.24);
-    color: #ecfff8;
-}
-
-.sound-consent-btn.is-primary:hover,
-.sound-consent-btn.is-primary:focus {
-    background: rgba(34, 234, 170, 0.34);
-    border-color: rgba(34, 234, 170, 0.95);
-}
-
 @media screen and (max-width: 768px) {
-    .sound-consent-panel {
-        bottom: 68px;
-        gap: 10px;
-        padding: 10px 12px;
+    .preloader-interactive-wrapper {
         width: calc(100vw - 18px);
+        padding: 24px 18px 20px 18px;
     }
-    .sound-consent-subtitle {
-        white-space: normal;
+    .preloader-greeting {
+        font-size: 26px;
+    }
+    .preloader-subtitle {
+        font-size: 12.5px;
     }
 }
 
