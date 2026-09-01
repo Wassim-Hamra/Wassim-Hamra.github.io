@@ -15,75 +15,79 @@ var flexSlider = function() {
   });
 };
 var initPreloader = function() {
-  if (sessionStorage.getItem('portfolioLoaded')) {
-    // Already loaded, let main.js handle fading out probootstrap-loader normally
-    return;
-  }
+  var PANEL_DISMISSED_KEY = 'portfolioSoundPanelDismissed';
+  var MUSIC_PREF_KEY = 'portfolioMusicPreference';
 
-  var loaderEl = $(".probootstrap-loader");
-  if (loaderEl.length === 0) return;
+  if (sessionStorage.getItem('loungeAudioState') === 'paused') return;
+  if (sessionStorage.getItem(PANEL_DISMISSED_KEY) === 'true') return;
 
-  var preloaderHtml = `
-    <div class="preloader-interactive-wrapper">
-      <img src="static/img/favicon/android-chrome-512x512.png" class="preloader-logo-img" alt="Wassim Hamra">
-      <h3 class="preloader-title">wassimhamra.tech</h3>
-      <div class="preloader-spinner-container" id="preloader-spinner-wrap">
-        <img src="static/img/preloader.gif" class="preloader-spinner-gif" alt="Loading...">
-        <span class="preloader-spinner-text">Loading...</span>
+  var pref = '';
+  try {
+    pref = localStorage.getItem(MUSIC_PREF_KEY) || '';
+  } catch (e) {}
+  if (pref === 'enabled') return;
+
+  var panelHtml = `
+    <div class="sound-consent-panel" id="sound-consent-panel" role="status" aria-live="polite">
+      <div class="sound-consent-dot"></div>
+      <div class="sound-consent-copy">
+        <div class="sound-consent-title">Enable ambient sound?</div>
+        <div class="sound-consent-subtitle">Smooth lounge audio for a better browsing vibe.</div>
       </div>
-      <button type="button" id="launch-portfolio-btn" class="preloader-btn">Enter</button>
+      <div class="sound-consent-actions">
+        <button type="button" id="sound-enable-btn" class="sound-consent-btn is-primary">Enable</button>
+        <button type="button" id="sound-later-btn" class="sound-consent-btn">Not now</button>
+      </div>
     </div>
   `;
-  loaderEl.html(preloaderHtml);
+  $('body').append(panelHtml);
 
-  // When window load completes (or page is ready), reveal launch button
-  $(window).on('load', function() {
-    setTimeout(function() {
-      $('#preloader-spinner-wrap').fadeOut(300, function() {
-        $('#launch-portfolio-btn').addClass('ready');
-      });
-    }, 600); // Small delay for smooth feel
-  });
+  var panel = $('#sound-consent-panel');
+  setTimeout(function() { panel.addClass('visible'); }, 80);
 
-  // Fallback in case window load fired before this script
-  if (document.readyState === 'complete') {
-    setTimeout(function() {
-      if (!$('#launch-portfolio-btn').hasClass('ready')) {
-        $('#preloader-spinner-wrap').fadeOut(300, function() {
-          $('#launch-portfolio-btn').addClass('ready');
-        });
-      }
-    }, 600);
-  }
+  var closePanel = function() {
+    sessionStorage.setItem(PANEL_DISMISSED_KEY, 'true');
+    panel.removeClass('visible');
+    setTimeout(function() { panel.remove(); }, 220);
+  };
 
-  $('#launch-portfolio-btn').on('click', function(e) {
+  var setPlayingUIState = function() {
+    sessionStorage.setItem('loungeAudioState', 'playing');
+    $('#lounge-player-widget').addClass('playing');
+    $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
+  };
+
+  $('#sound-enable-btn').on('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-
-    sessionStorage.setItem('portfolioLoaded', 'true');
-    loaderEl.addClass('loaded');
-    loaderEl.fadeOut("slow", function() {
-      loaderEl.remove();
-    });
-    
-    // Attempt playing the ambient lounge music on user interaction safely
+    try { localStorage.setItem(MUSIC_PREF_KEY, 'enabled'); } catch (err) {}
     var audio = $('#lounge-audio')[0];
-    if (audio) {
-      try {
-        var playPromise = audio.play();
-        if (playPromise !== undefined && typeof playPromise.then === 'function') {
-          playPromise.then(function() {
-            sessionStorage.setItem('loungeAudioState', 'playing');
-            $('#lounge-player-widget').addClass('playing');
-            $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
-          }).catch(function(err) {});
-        } else {
-          sessionStorage.setItem('loungeAudioState', 'playing');
-          $('#lounge-player-widget').addClass('playing');
-          $('#lounge-card-play-icon').removeClass('icon-play2').addClass('icon-pause2');
-        }
-      } catch (err) {}
+    if (!audio) {
+      closePanel();
+      return;
     }
+    try {
+      var playPromise = audio.play();
+      if (playPromise !== undefined && typeof playPromise.then === 'function') {
+        playPromise.then(function() {
+          setPlayingUIState();
+          closePanel();
+        }).catch(function() {
+          closePanel();
+        });
+      } else {
+        setPlayingUIState();
+        closePanel();
+      }
+    } catch (err) {
+      closePanel();
+    }
+  });
+
+  $('#sound-later-btn').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    closePanel();
   });
 };
 
@@ -97,7 +101,7 @@ $(document).ready(function() {
   initAIChatbot(); // Initialize Ask Wassim AI chatbot widget
   initTimelineAnimation(); // Initialize scroll-animated timeline for about page
   initLoungeAudioPlayer(); // Initialize subtle lounge audio player
-  initPreloader(); // Run preloader to capture gesture and start audio
+  initPreloader(); // Show soft sound-consent panel for first-time visitors
 });
 
 var fetchGitHubRepos = function() {
@@ -1573,6 +1577,7 @@ var initLoungeAudioPlayer = function() {
           widget.addClass('playing');
           cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
           sessionStorage.setItem('loungeAudioState', 'playing');
+          try { localStorage.setItem('portfolioMusicPreference', 'enabled'); } catch (err) {}
         }).catch(function(e) {
           $(document).one('click scroll keydown touchstart', function() {
             if (!isPlaying) {
@@ -1585,6 +1590,7 @@ var initLoungeAudioPlayer = function() {
         widget.addClass('playing');
         cardPlayIcon.removeClass('icon-play2').addClass('icon-pause2');
         sessionStorage.setItem('loungeAudioState', 'playing');
+        try { localStorage.setItem('portfolioMusicPreference', 'enabled'); } catch (err) {}
       }
     } catch (e) {
       $(document).one('click scroll keydown touchstart', function() {
@@ -1664,8 +1670,12 @@ var initLoungeAudioPlayer = function() {
     }
   });
 
-  // Auto-play on entry or resume if user hasn't explicitly paused
-  if (sessionStorage.getItem('loungeAudioState') !== 'paused') {
+  // Auto-play only for users who previously opted in.
+  var musicPref = '';
+  try {
+    musicPref = localStorage.getItem('portfolioMusicPreference') || '';
+  } catch (e) {}
+  if (musicPref === 'enabled' && sessionStorage.getItem('loungeAudioState') !== 'paused') {
     playAudio();
   }
 };
