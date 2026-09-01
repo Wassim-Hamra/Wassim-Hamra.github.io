@@ -904,12 +904,18 @@ var initLoungeAudioPlayer = function() {
 
           <div class="island-expanded-bottom">
             <div class="island-track-details">
-              <span class="lounge-track-title"><i class="icon-music" style="color:#22eaaa; font-size:11px; margin-right:4px;"></i> Lounge Jazz Vibes</span>
-              <span class="lounge-track-subtitle">Low-key Ambient</span>
+              <span class="lounge-track-title"><i class="icon-music" style="color:#22eaaa; font-size:11px; margin-right:4px;"></i> <span id="lounge-track-name">Lounge Jazz Vibes</span></span>
+              <span class="lounge-track-subtitle" id="lounge-track-genre">Jazz · Low-key Ambient</span>
             </div>
             <div class="lounge-controls">
+              <button class="lounge-btn" id="lounge-prev-btn" title="Previous Track">
+                <span style="font-size:12px;">◀</span>
+              </button>
               <button class="lounge-btn" id="lounge-card-play-btn" title="Play / Pause">
                 <i class="icon-play2" id="lounge-card-play-icon"></i>
+              </button>
+              <button class="lounge-btn" id="lounge-next-btn" title="Next Track">
+                <span style="font-size:12px;">▶</span>
               </button>
               <button class="lounge-btn" id="lounge-mute-btn" title="Mute / Unmute">
                 <i class="icon-volume-medium" id="lounge-mute-icon"></i>
@@ -920,9 +926,7 @@ var initLoungeAudioPlayer = function() {
         </div>
 
       </div>
-      <audio id="lounge-audio" loop preload="auto">
-        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-      </audio>
+      <audio id="lounge-audio" preload="auto"></audio>
     </div>
   `;
   $('body').append(playerHtml);
@@ -930,11 +934,49 @@ var initLoungeAudioPlayer = function() {
   var widget = $('#lounge-player-widget');
   var capsule = $('#lounge-island-capsule');
   var audio = $('#lounge-audio')[0];
+  var prevBtn = $('#lounge-prev-btn');
   var cardPlayBtn = $('#lounge-card-play-btn');
   var cardPlayIcon = $('#lounge-card-play-icon');
+  var nextBtn = $('#lounge-next-btn');
   var muteBtn = $('#lounge-mute-btn');
   var muteIcon = $('#lounge-mute-icon');
   var volumeSlider = $('#lounge-volume-slider');
+  var trackNameEl = $('#lounge-track-name');
+  var trackGenreEl = $('#lounge-track-genre');
+
+  var PLAYLIST_INDEX_KEY = 'loungePlaylistIndex';
+  var playlist = [
+    {
+      title: 'Lofi Study',
+      genre: 'Jazz / Chill',
+      subtitle: 'Low-key Ambient',
+      url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3'
+    },
+    {
+      title: 'Groovy Jazz Funk',
+      genre: 'Jazz / Upbeat',
+      subtitle: 'Warm Groove',
+      url: 'https://cdn.pixabay.com/audio/2022/10/16/audio_12e9fd38b7.mp3'
+    },
+    {
+      title: 'Happy Upbeat Jazz',
+      genre: 'Upbeat',
+      subtitle: 'Bright & Energetic',
+      url: 'https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c06b8.mp3'
+    },
+    {
+      title: 'Upbeat Electronica',
+      genre: 'EDM',
+      subtitle: 'Future Bass Energy',
+      url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_124b150dab.mp3'
+    },
+    {
+      title: 'EDM Party',
+      genre: 'EDM',
+      subtitle: 'Party Pulse',
+      url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_124cdbf991.mp3'
+    }
+  ];
 
   // Real-time visitor clock logic
   var updateVisitorTime = function() {
@@ -1543,10 +1585,40 @@ var initLoungeAudioPlayer = function() {
   var defaultVol = 0.17;
   audio.volume = defaultVol;
   volumeSlider.val(defaultVol);
+  audio.loop = false;
 
   var isPlaying = false;
   var isTimeRestored = false;
   var targetSavedTime = parseFloat(sessionStorage.getItem('loungeAudioTime') || '0');
+  var currentTrackIndex = parseInt(sessionStorage.getItem(PLAYLIST_INDEX_KEY) || '0', 10);
+  if (!Number.isFinite(currentTrackIndex) || currentTrackIndex < 0 || currentTrackIndex >= playlist.length) {
+    currentTrackIndex = 0;
+  }
+  var trackLoadErrorCount = 0;
+
+  var updateTrackUi = function() {
+    var track = playlist[currentTrackIndex] || playlist[0];
+    if (!track) return;
+    trackNameEl.text(track.title);
+    trackGenreEl.text(track.genre + ' · ' + track.subtitle);
+  };
+
+  var loadTrack = function(newIndex, autoPlayAfterLoad, preserveSavedTime) {
+    if (playlist.length === 0) return;
+    currentTrackIndex = (newIndex + playlist.length) % playlist.length;
+    sessionStorage.setItem(PLAYLIST_INDEX_KEY, currentTrackIndex.toString());
+    if (!preserveSavedTime) {
+      targetSavedTime = 0;
+      sessionStorage.setItem('loungeAudioTime', '0');
+    }
+    isTimeRestored = false;
+    audio.src = playlist[currentTrackIndex].url;
+    updateTrackUi();
+    audio.load();
+    if (autoPlayAfterLoad) {
+      playAudio();
+    }
+  };
 
   // Safely restore timestamp only when audio is ready
   var applySavedTime = function() {
@@ -1578,6 +1650,9 @@ var initLoungeAudioPlayer = function() {
   });
 
   var playAudio = function() {
+    if (!audio.src && playlist.length > 0) {
+      loadTrack(currentTrackIndex, false);
+    }
     applySavedTime();
     try {
       var playPromise = audio.play();
@@ -1627,6 +1702,10 @@ var initLoungeAudioPlayer = function() {
     }
   };
 
+  var switchTrack = function(step) {
+    loadTrack(currentTrackIndex + step, isPlaying, false);
+  };
+
   // Capsule Click -> Toggle Island Expansion
   capsule.on('click', function(e) {
     if ($(e.target).closest('.lounge-controls').length > 0) {
@@ -1650,6 +1729,16 @@ var initLoungeAudioPlayer = function() {
   cardPlayBtn.on('click', function(e) {
     e.stopPropagation();
     togglePlay();
+  });
+
+  // Previous / Next track controls
+  prevBtn.on('click', function(e) {
+    e.stopPropagation();
+    switchTrack(-1);
+  });
+  nextBtn.on('click', function(e) {
+    e.stopPropagation();
+    switchTrack(1);
   });
 
   // Volume slider input
@@ -1679,6 +1768,23 @@ var initLoungeAudioPlayer = function() {
       muteIcon.removeClass('icon-volume-mute2').addClass('icon-volume-medium');
     }
   });
+
+  // Auto-advance to next track and recover from failed URLs
+  audio.addEventListener('ended', function() {
+    switchTrack(1);
+  });
+  audio.addEventListener('canplay', function() {
+    trackLoadErrorCount = 0;
+  });
+  audio.addEventListener('error', function() {
+    if (playlist.length <= 1) return;
+    if (trackLoadErrorCount >= playlist.length - 1) return;
+    trackLoadErrorCount += 1;
+    switchTrack(1);
+  });
+
+  // Load initial track metadata/state.
+  loadTrack(currentTrackIndex, false, true);
 
   // Auto-play only for users who previously opted in.
   var musicPref = '';
