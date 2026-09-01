@@ -951,30 +951,6 @@ var initLoungeAudioPlayer = function() {
       genre: 'Jazz / Chill',
       subtitle: 'Low-key Ambient',
       url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3'
-    },
-    {
-      title: 'Groovy Jazz Funk',
-      genre: 'Jazz / Upbeat',
-      subtitle: 'Warm Groove',
-      url: 'https://cdn.pixabay.com/audio/2022/10/16/audio_12e9fd38b7.mp3'
-    },
-    {
-      title: 'Happy Upbeat Jazz',
-      genre: 'Upbeat',
-      subtitle: 'Bright & Energetic',
-      url: 'https://cdn.pixabay.com/audio/2022/03/15/audio_115b6c06b8.mp3'
-    },
-    {
-      title: 'Upbeat Electronica',
-      genre: 'EDM',
-      subtitle: 'Future Bass Energy',
-      url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_124b150dab.mp3'
-    },
-    {
-      title: 'EDM Party',
-      genre: 'EDM',
-      subtitle: 'Party Pulse',
-      url: 'https://cdn.pixabay.com/audio/2022/07/26/audio_124cdbf991.mp3'
     }
   ];
 
@@ -1703,6 +1679,7 @@ var initLoungeAudioPlayer = function() {
   };
 
   var switchTrack = function(step) {
+    if (playlist.length <= 1) return;
     loadTrack(currentTrackIndex + step, isPlaying, false);
   };
 
@@ -1785,6 +1762,11 @@ var initLoungeAudioPlayer = function() {
 
   // Load initial track metadata/state.
   loadTrack(currentTrackIndex, false, true);
+
+  if (playlist.length <= 1) {
+    prevBtn.prop('disabled', true).css({ opacity: 0.35, cursor: 'default' });
+    nextBtn.prop('disabled', true).css({ opacity: 0.35, cursor: 'default' });
+  }
 
   // Auto-play only for users who previously opted in.
   var musicPref = '';
