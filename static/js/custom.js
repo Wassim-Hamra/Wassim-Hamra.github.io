@@ -1077,6 +1077,8 @@ var initLoungeAudioPlayer = function() {
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'hidden') {
       flushCurrentPageDuration();
+    } else if (document.visibilityState === 'visible') {
+      sessionStorage.setItem(PAGE_ENTERED_AT_KEY, Date.now().toString());
     }
   });
 
@@ -1168,9 +1170,8 @@ var initLoungeAudioPlayer = function() {
 
   var sendWeb3Alert = function(country, isFinalUpdate) {
     flushCurrentPageDuration();
-
-    var elapsedSeconds = Math.max(5, Math.round((Date.now() - sessionStartTime) / 1000));
-    var durationText = formatDuration(elapsedSeconds);
+    var elapsedSeconds = 0;
+    var durationText = '0s';
 
     var currentFlow = [];
     try {
@@ -1199,11 +1200,21 @@ var initLoungeAudioPlayer = function() {
     var pageDurationsMs = readSessionObject(PAGE_DURATIONS_KEY);
     var pageDurationsSeconds = {};
     var pageDurationsHuman = {};
+    var totalActiveMs = 0;
     Object.keys(pageDurationsMs).forEach(function(page) {
-      var sec = Math.max(0, Math.round((parseInt(pageDurationsMs[page] || 0, 10)) / 1000));
+      var ms = Math.max(0, parseInt(pageDurationsMs[page] || 0, 10));
+      totalActiveMs += ms;
+      var sec = Math.round(ms / 1000);
       pageDurationsSeconds[page] = sec;
       pageDurationsHuman[page] = formatDuration(sec);
     });
+    var computedActiveSeconds = Math.round(totalActiveMs / 1000);
+    if (computedActiveSeconds > 0) {
+      elapsedSeconds = computedActiveSeconds;
+    } else {
+      elapsedSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
+    }
+    durationText = formatDuration(elapsedSeconds);
 
     var sessionId = sessionStorage.getItem(SESSION_ID_KEY);
     if (!sessionId) {
@@ -1440,11 +1451,7 @@ var initLoungeAudioPlayer = function() {
     };
 
     window.addEventListener('pagehide', handleExit, { capture: true });
-    document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'hidden') {
-        handleExit();
-      }
-    });
+    window.addEventListener('beforeunload', handleExit, { capture: true });
   };
 
   var applyGeoAndWeather = function(country, weatherText) {
