@@ -825,30 +825,20 @@ var initLoungeAudioPlayer = function() {
     <div class="dynamic-island-widget" id="lounge-player-widget">
       <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle player & info">
         
-        <!-- Collapsed Content (Sliding Ticker: Time -> Location -> Météo -> Song) -->
+        <!-- Collapsed Content -->
         <div class="island-collapsed-content">
-          <div class="island-ticker-viewport">
-            <div class="island-ticker-track" id="island-ticker-track">
-              <!-- 1. Time -->
-              <div class="island-ticker-item">
-                <i class="icon-clock2"></i>
-                <span id="ticker-time">--:--</span>
-              </div>
-              <!-- 2. Location -->
-              <div class="island-ticker-item">
-                <i class="icon-location2"></i>
-                <span id="ticker-location">Detecting...</span>
-              </div>
-              <!-- 3. Météo -->
-              <div class="island-ticker-item">
-                <span id="ticker-weather">⛅ Weather</span>
-              </div>
-              <!-- 4. Song -->
-              <div class="island-ticker-item">
-                <i class="icon-music"></i>
-                <span id="ticker-song">Lounge Jazz</span>
-              </div>
-            </div>
+          <div class="island-collapsed-inline">
+            <span class="island-collapsed-chip">
+              <i class="icon-location2"></i>
+              <span id="visitor-location-short">Detecting...</span>
+            </span>
+            <span class="island-collapsed-chip">
+              <span id="visitor-weather-short">⛅ --</span>
+            </span>
+            <span class="island-collapsed-chip">
+              <i class="icon-clock2"></i>
+              <span id="visitor-time-short">--:--</span>
+            </span>
           </div>
           <div class="island-collapsed-right">
             <div class="lounge-eq-bars">
@@ -903,17 +893,6 @@ var initLoungeAudioPlayer = function() {
   var muteIcon = $('#lounge-mute-icon');
   var volumeSlider = $('#lounge-volume-slider');
 
-  // Sliding Ticker Animation for Collapsed Island (Time -> Location -> Météo -> Song)
-  var tickerIndex = 0;
-  var tickerCount = 4;
-  var tickerStep = 24;
-  setInterval(function() {
-    if (!widget.hasClass('expanded')) {
-      tickerIndex = (tickerIndex + 1) % tickerCount;
-      $('#island-ticker-track').css('transform', 'translateY(' + (-tickerIndex * tickerStep) + 'px)');
-    }
-  }, 2800);
-
   // Real-time visitor clock logic
   var updateVisitorTime = function() {
     var now = new Date();
@@ -925,7 +904,6 @@ var initLoungeAudioPlayer = function() {
     var minutesStr = minutes < 10 ? '0' + minutes : minutes;
     var timeFormatted = hours + ':' + minutesStr + ' ' + ampm;
 
-    $('#ticker-time').text(timeFormatted);
     $('#visitor-time-short').text(timeFormatted);
     $('#expanded-time-text').text(timeFormatted);
   };
@@ -1454,9 +1432,12 @@ var initLoungeAudioPlayer = function() {
   var applyGeoAndWeather = function(country, weatherText) {
     var countryDisplay = country || 'Earth';
     $('#visitor-location-short').text(countryDisplay);
+    $('#visitor-weather-short').text(weatherText || '⛅ --');
     $('#expanded-location-text').text(countryDisplay);
     if (weatherText) {
       $('#expanded-weather-badge').html('<span style="color:#22eaaa; font-weight:500;">' + weatherText + '</span>');
+    } else {
+      $('#expanded-weather-badge').text('');
     }
     notifyVisitorEntry(countryDisplay);
   };

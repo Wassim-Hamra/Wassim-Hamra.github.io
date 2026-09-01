@@ -973,37 +973,29 @@
     position: absolute;
 }
 
-.island-ticker-viewport {
-    flex: 1;
-    min-width: 0;
-    height: 24px;
-    overflow: hidden;
-    position: relative;
-}
-
-.island-ticker-track {
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.35s ease;
-    will-change: transform;
-}
-
-.island-ticker-item {
-    height: 24px;
+.island-collapsed-inline {
     display: flex;
     align-items: center;
-    gap: 7px;
-    font-size: 12px;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.island-collapsed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
     font-weight: 600;
-    color: #c9d1d9;
+    color: #d1dbd8;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.island-ticker-item i {
+.island-collapsed-chip i {
     color: #22eaaa;
-    font-size: 13px;
+    font-size: 12px;
     flex-shrink: 0;
 }
 
