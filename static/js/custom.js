@@ -828,18 +828,32 @@ var initLoungeAudioPlayer = function() {
     <div class="dynamic-island-widget" id="lounge-player-widget">
       <div class="dynamic-island-capsule" id="lounge-island-capsule" title="Click to toggle player & info">
         
-        <!-- Collapsed Content -->
+        <!-- Collapsed Content (Sliding Ticker: Time -> Location -> Météo -> Song) -->
         <div class="island-collapsed-content">
-          <div class="island-left-info">
-            <i class="icon-location2"></i>
-            <span class="island-mini-title">
-              <span id="visitor-location-short">Detecting...</span> · <span id="visitor-time-short">--:--</span>
-            </span>
+          <div class="island-ticker-viewport">
+            <div class="island-ticker-track" id="island-ticker-track">
+              <!-- 1. Time -->
+              <div class="island-ticker-item">
+                <i class="icon-clock2"></i>
+                <span id="ticker-time">--:--</span>
+              </div>
+              <!-- 2. Location -->
+              <div class="island-ticker-item">
+                <i class="icon-location2"></i>
+                <span id="ticker-location">Detecting...</span>
+              </div>
+              <!-- 3. Météo -->
+              <div class="island-ticker-item">
+                <span id="ticker-weather">⛅ Weather</span>
+              </div>
+              <!-- 4. Song -->
+              <div class="island-ticker-item">
+                <i class="icon-music"></i>
+                <span id="ticker-song">Lounge Jazz</span>
+              </div>
+            </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 11px; color: #8b949e; display: flex; align-items: center; gap: 4px;">
-              <i class="icon-music" style="color: #22eaaa; font-size: 11px;"></i> Jazz
-            </span>
+          <div class="island-collapsed-right">
             <div class="lounge-eq-bars">
               <span></span><span></span><span></span><span></span>
             </div>
@@ -892,6 +906,17 @@ var initLoungeAudioPlayer = function() {
   var muteIcon = $('#lounge-mute-icon');
   var volumeSlider = $('#lounge-volume-slider');
 
+  // Sliding Ticker Animation for Collapsed Island (Time -> Location -> Météo -> Song)
+  var tickerIndex = 0;
+  var tickerCount = 4;
+  var tickerStep = 24;
+  setInterval(function() {
+    if (!widget.hasClass('expanded')) {
+      tickerIndex = (tickerIndex + 1) % tickerCount;
+      $('#island-ticker-track').css('transform', 'translateY(' + (-tickerIndex * tickerStep) + 'px)');
+    }
+  }, 2800);
+
   // Real-time visitor clock logic
   var updateVisitorTime = function() {
     var now = new Date();
@@ -903,6 +928,7 @@ var initLoungeAudioPlayer = function() {
     var minutesStr = minutes < 10 ? '0' + minutes : minutes;
     var timeFormatted = hours + ':' + minutesStr + ' ' + ampm;
 
+    $('#ticker-time').text(timeFormatted);
     $('#visitor-time-short').text(timeFormatted);
     $('#expanded-time-text').text(timeFormatted);
   };
@@ -1110,33 +1136,31 @@ var initLoungeAudioPlayer = function() {
     }
   };
 
-  // Send email notification on new visitor entry via Web3Forms
+  // Send one notification email per browser session via Web3Forms
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
 
-    // Trigger 1: Send verified alert after 5 seconds on site
-    if (!sessionStorage.getItem('visitorNotified')) {
-      setTimeout(function() {
-        if (!sessionStorage.getItem('visitorNotified')) {
-          sessionStorage.setItem('visitorNotified', 'true');
-          sendWeb3Alert(country, false);
-        }
-      }, 5000);
-    }
+    var hasSent = function() {
+      return sessionStorage.getItem('visitorNotified') === 'true';
+    };
+    var markSent = function() {
+      sessionStorage.setItem('visitorNotified', 'true');
+    };
 
-    // Trigger 2: Send final journey summary on departure if they browsed multiple pages or spent > 30s
-    var handleExit = function() {
-      if (sessionStorage.getItem('visitorFinalNotified')) return;
-      var flowCheck = [];
-      try {
-        flowCheck = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
-      } catch (e) {}
-
-      var elapsed = Math.round((Date.now() - sessionStartTime) / 1000);
-      if (flowCheck.length > 1 || elapsed >= 30) {
-        sessionStorage.setItem('visitorFinalNotified', 'true');
-        sendWeb3Alert(country, true);
+    // Trigger 1: send once after 5 seconds of active visit
+    var notifyTimer = setTimeout(function() {
+      if (!hasSent()) {
+        markSent();
+        sendWeb3Alert(country, false);
       }
+    }, 5000);
+
+    // Trigger 2: fallback for short bounces (leave before 5s) - still send only once
+    var handleExit = function() {
+      if (hasSent()) return;
+      clearTimeout(notifyTimer);
+      markSent();
+      sendWeb3Alert(country, false);
     };
 
     window.addEventListener('pagehide', handleExit, { capture: true });
