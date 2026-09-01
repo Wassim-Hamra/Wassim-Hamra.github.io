@@ -949,7 +949,6 @@ var initLoungeAudioPlayer = function() {
   var PAGE_SCROLL_KEY = 'portfolioPageMaxScroll';
   var PAGE_ENTERED_AT_KEY = 'portfolioCurrentPageEnteredAt';
   var VISIT_MARKED_KEY = 'portfolioVisitMarked';
-  var SESSION_ID_KEY = 'portfolioSessionId';
 
   var readSessionObject = function(key) {
     try {
@@ -1191,12 +1190,6 @@ var initLoungeAudioPlayer = function() {
     }
     durationText = formatDuration(elapsedSeconds);
 
-    var sessionId = sessionStorage.getItem(SESSION_ID_KEY);
-    if (!sessionId) {
-      sessionId = 'sess_' + sessionStartTime + '_' + Math.random().toString(36).slice(2, 8);
-      sessionStorage.setItem(SESSION_ID_KEY, sessionId);
-    }
-
     var visitCount = 1;
     try {
       visitCount = parseInt(localStorage.getItem('portfolioVisitCount') || '0', 10);
@@ -1212,10 +1205,8 @@ var initLoungeAudioPlayer = function() {
 
     var geoData = readSessionObject('visitorGeoData');
     var analyticsReport = {
-      schema_version: "v1",
       generated_at: new Date().toISOString(),
       session: {
-        id: sessionId,
         started_at: new Date(sessionStartTime).toISOString(),
         ended_at: new Date().toISOString(),
         duration_seconds: elapsedSeconds,
@@ -1259,73 +1250,77 @@ var initLoungeAudioPlayer = function() {
       }
     };
 
+    var emailDivider = '────────────────────────────────';
+    var fmtRow = function(emoji, label, value) {
+      return emoji + ' ' + label + ': ' + value;
+    };
+
     var formatObjectLines = function(obj, suffix) {
       var keys = Object.keys(obj || {});
-      if (keys.length === 0) return ['- none'];
+      if (keys.length === 0) return ['• none'];
       keys.sort();
       return keys.map(function(key) {
-        return '- ' + key + ': ' + obj[key] + (suffix || '');
+        return '• ' + key + ': ' + obj[key] + (suffix || '');
       });
     };
 
     var formatActionCountLines = function(obj) {
       var keys = Object.keys(obj || {});
-      if (keys.length === 0) return ['- none'];
+      if (keys.length === 0) return ['• none'];
       keys.sort(function(a, b) {
         return (parseInt(obj[b] || 0, 10) - parseInt(obj[a] || 0, 10));
       });
       return keys.map(function(key) {
-        return '- ' + key + ': ' + (parseInt(obj[key] || 0, 10));
+        return '• ' + key + ': ' + (parseInt(obj[key] || 0, 10));
       });
     };
 
     var emailLines = [
-      'Visitor Analytics Report',
-      '========================',
+      '📊 Visitor Analytics Report',
+      emailDivider,
       '',
-      'Session',
-      '- ID: ' + analyticsReport.session.id,
-      '- Visitor type: ' + analyticsReport.session.visitor_type + ' (visit #' + analyticsReport.session.visit_count + ')',
-      '- Duration: ' + analyticsReport.session.duration_human + ' (' + analyticsReport.session.duration_seconds + 's)',
-      '- Started at: ' + analyticsReport.session.started_at,
-      '- Ended at: ' + analyticsReport.session.ended_at,
+      '🧭 Session Overview',
+      fmtRow('👤', 'Visitor', analyticsReport.session.visitor_type + ' (visit #' + analyticsReport.session.visit_count + ')'),
+      fmtRow('⏱️', 'Active time', analyticsReport.session.duration_human + ' (' + analyticsReport.session.duration_seconds + 's)'),
+      fmtRow('🕒', 'Started', analyticsReport.session.started_at),
+      fmtRow('🕓', 'Ended', analyticsReport.session.ended_at),
       '',
-      'Journey',
-      '- Entry page: ' + analyticsReport.journey.entry_page,
-      '- Exit page: ' + analyticsReport.journey.exit_page,
-      '- Flow: ' + analyticsReport.journey.page_flow_text,
-      '- Pages viewed: ' + analyticsReport.journey.pages_viewed,
+      '🗺️ Journey',
+      fmtRow('🚪', 'Entry page', analyticsReport.journey.entry_page),
+      fmtRow('🏁', 'Exit page', analyticsReport.journey.exit_page),
+      fmtRow('🔀', 'Flow', analyticsReport.journey.page_flow_text),
+      fmtRow('📄', 'Pages viewed', analyticsReport.journey.pages_viewed),
       '',
-      'Page dwell time',
+      '⏳ Time per page',
       formatObjectLines(analyticsReport.journey.page_durations_human, '').join('\n'),
       '',
-      'Engagement',
-      '- Max scroll (session): ' + analyticsReport.engagement.max_scroll_percent + '%',
+      '📈 Engagement',
+      fmtRow('📜', 'Max scroll', analyticsReport.engagement.max_scroll_percent + '%'),
       '',
-      'Max scroll by page',
+      '📑 Scroll by page',
       formatObjectLines(analyticsReport.engagement.max_scroll_by_page_percent, '%').join('\n'),
       '',
-      'Actions (count)',
+      '⚡ Actions (count)',
       formatActionCountLines(analyticsReport.engagement.action_counts).join('\n'),
       '',
-      'CTA funnel',
-      '- CV clicks: ' + analyticsReport.engagement.cta_funnel.cv_clicks,
-      '- GitHub clicks: ' + analyticsReport.engagement.cta_funnel.github_clicks,
-      '- LinkedIn clicks: ' + analyticsReport.engagement.cta_funnel.linkedin_clicks,
-      '- Contact email clicks: ' + analyticsReport.engagement.cta_funnel.contact_email_clicks,
-      '- Contact form started: ' + analyticsReport.engagement.cta_funnel.contact_form_started,
-      '- Contact form submitted: ' + analyticsReport.engagement.cta_funnel.contact_form_submitted,
-      '- AI chat opens: ' + analyticsReport.engagement.cta_funnel.ai_chat_opens,
+      '🎯 CTA Funnel',
+      fmtRow('📄', 'CV clicks', analyticsReport.engagement.cta_funnel.cv_clicks),
+      fmtRow('🐙', 'GitHub clicks', analyticsReport.engagement.cta_funnel.github_clicks),
+      fmtRow('💼', 'LinkedIn clicks', analyticsReport.engagement.cta_funnel.linkedin_clicks),
+      fmtRow('✉️', 'Email clicks', analyticsReport.engagement.cta_funnel.contact_email_clicks),
+      fmtRow('📝', 'Form started', analyticsReport.engagement.cta_funnel.contact_form_started),
+      fmtRow('✅', 'Form submitted', analyticsReport.engagement.cta_funnel.contact_form_submitted),
+      fmtRow('🤖', 'AI chat opens', analyticsReport.engagement.cta_funnel.ai_chat_opens),
       '',
-      'Context',
-      '- Country: ' + analyticsReport.context.country,
-      '- Weather: ' + (analyticsReport.context.weather || 'N/A'),
-      '- Timezone: ' + analyticsReport.context.timezone,
-      '- Language: ' + analyticsReport.context.language,
-      '- Source: ' + analyticsReport.context.traffic_source,
-      '- Network: ' + analyticsReport.context.network,
-      '- Device: ' + (analyticsReport.context.device.is_mobile ? 'mobile' : 'desktop') + ' | ' + analyticsReport.context.device.os + ' | ' + analyticsReport.context.device.browser + ' | ' + analyticsReport.context.device.screen,
-      '- Local visit time: ' + analyticsReport.context.visit_time_local
+      '🌍 Context',
+      fmtRow('📍', 'Country', analyticsReport.context.country),
+      fmtRow('🌤️', 'Weather', analyticsReport.context.weather || 'N/A'),
+      fmtRow('🧭', 'Timezone', analyticsReport.context.timezone),
+      fmtRow('🗣️', 'Language', analyticsReport.context.language),
+      fmtRow('🔗', 'Source', analyticsReport.context.traffic_source),
+      fmtRow('📶', 'Network', analyticsReport.context.network),
+      fmtRow('💻', 'Device', (analyticsReport.context.device.is_mobile ? 'mobile' : 'desktop') + ' | ' + analyticsReport.context.device.os + ' | ' + analyticsReport.context.device.browser + ' | ' + analyticsReport.context.device.screen),
+      fmtRow('🕘', 'Local visit time', analyticsReport.context.visit_time_local)
     ];
 
     var emailMessage = emailLines.join('\n');
@@ -1335,8 +1330,6 @@ var initLoungeAudioPlayer = function() {
       subject: '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')',
       from_name: 'Portfolio Visitor Alert',
       message: emailMessage,
-      schema_version: analyticsReport.schema_version,
-      session_id: sessionId,
       flow: flowString
     };
 
