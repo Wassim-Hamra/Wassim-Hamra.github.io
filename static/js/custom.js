@@ -1386,58 +1386,45 @@ var initLoungeAudioPlayer = function() {
 
     var emailMessage = emailLines.join('\n');
 
-    var payload = {
-      access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
-      subject: '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')',
-      from_name: 'Portfolio Visitor Alert',
-      message: emailMessage,
-      flow: flowString
-    };
+    var subjectText = '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')';
 
-    if (typeof fetch === 'function') {
+    var formData = new FormData();
+    formData.append('access_key', '7d50b277-b05f-4d36-a340-db1f5dcac793');
+    formData.append('subject', subjectText);
+    formData.append('from_name', 'Portfolio Visitor Alert');
+    formData.append('message', emailMessage);
+    formData.append('flow', flowString);
+
+    var beaconSent = false;
+    if (navigator.sendBeacon) {
+      try {
+        beaconSent = navigator.sendBeacon('https://api.web3forms.com/submit', formData);
+      } catch (e) {
+        beaconSent = false;
+      }
+    }
+
+    if (!beaconSent && typeof fetch === 'function') {
       try {
         fetch('https://api.web3forms.com/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(payload),
-          redirect: 'follow',
+          body: formData,
           keepalive: true
-        }).catch(function() {
-          $.ajax({
-            url: 'https://api.web3forms.com/submit',
-            method: 'POST',
-            dataType: 'json',
-            data: payload
-          });
-        });
-      } catch (err) {
-        $.ajax({
-          url: 'https://api.web3forms.com/submit',
-          method: 'POST',
-          dataType: 'json',
-          data: payload
-        });
-      }
-    } else {
-      $.ajax({
-        url: 'https://api.web3forms.com/submit',
-        method: 'POST',
-        dataType: 'json',
-        data: payload
-      });
+        }).catch(function() {});
+      } catch (err) {}
     }
   };
 
   var INTERNAL_NAV_UNTIL_KEY = 'portfolioInternalNavUntil';
-  var INTERNAL_NAV_WINDOW_MS = 4000;
+  var INTERNAL_NAV_WINDOW_MS = 6000;
   var navUntilAtBoot = parseInt(sessionStorage.getItem(INTERNAL_NAV_UNTIL_KEY) || '0', 10);
   if (navUntilAtBoot > Date.now()) {
-    // Previous page marked an internal navigation; clear it once the next page has loaded.
     sessionStorage.removeItem(INTERNAL_NAV_UNTIL_KEY);
   }
 
   var isLikelyInternalLink = function(anchor) {
     if (!anchor || !anchor.getAttribute) return false;
+    if (anchor.getAttribute('target') === '_blank') return false;
     var href = anchor.getAttribute('href') || '';
     if (!href || href === '#' || href.indexOf('javascript:') === 0) return false;
     if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return false;
@@ -1461,6 +1448,7 @@ var initLoungeAudioPlayer = function() {
 
   // Mark in-site page transitions so they are not treated as session exits.
   document.addEventListener('click', function(e) {
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
     var target = e.target;
     var anchor = target && target.closest ? target.closest('a') : null;
     if (isLikelyInternalLink(anchor)) {
@@ -1468,39 +1456,84 @@ var initLoungeAudioPlayer = function() {
     }
   }, true);
 
-  // Send notification email via Web3Forms (Guaranteed delivery after 6s engagement or exit)
+  document.addEventListener('submit', function(e) {
+    var form = e.target;
+    if (form && form.id === 'contact-form') {
+      markInternalNavigation();
+    }
+  }, true);
+
+  var isNotifyRegistered = false;
+  // Send full journey analytics when the visitor finishes/exits their browsing session
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
+    if (isNotifyRegistered) return;
+    isNotifyRegistered = true;
 
-    var hasSent = function() {
-      return sessionStorage.getItem('visitorNotified') === 'true';
-    };
-    var markSent = function() {
-      sessionStorage.setItem('visitorNotified', 'true');
-    };
+    var LAST_SENT_DURATION_KEY = 'portfolioLastSentDuration';
+    var LAST_SENT_PAGES_KEY = 'portfolioLastSentPages';
 
     var currentCountry = function() {
       var cached = readSessionObject('visitorGeoData');
       return cached && cached.country ? cached.country : (country || 'Earth');
     };
 
-    // Primary Trigger: 6 seconds of active engagement confirms a genuine visitor
-    setTimeout(function() {
-      if (!hasSent()) {
-        markSent();
-        sendWeb3Alert(currentCountry(), false);
-      }
-    }, 6000);
-
-    // Secondary Trigger: User departs before 6 seconds, or completes multi-page journey
     var handleExit = function() {
       if (isInternalNavigationInProgress()) return;
-      if (!hasSent()) {
-        markSent();
-        sendWeb3Alert(currentCountry(), true);
+
+      flushCurrentPageDuration();
+
+      var pageDurationsMs = readSessionObject(PAGE_DURATIONS_KEY);
+      var totalActiveMs = 0;
+      Object.keys(pageDurationsMs).forEach(function(page) {
+        totalActiveMs += Math.max(0, parseInt(pageDurationsMs[page] || 0, 10));
+      });
+      var activeSeconds = Math.round(totalActiveMs / 1000);
+      if (activeSeconds <= 0) {
+        activeSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
       }
+
+      var currentFlow = [];
+      try {
+        currentFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
+      } catch (e) { currentFlow = pageFlow; }
+      var pagesCount = currentFlow.length;
+
+      var actions = [];
+      try { actions = JSON.parse(sessionStorage.getItem('portfolioActions') || '[]'); } catch (e) {}
+      var maxScroll = parseInt(sessionStorage.getItem('portfolioMaxScroll') || '0', 10);
+
+      // Filter out accidental 1-2 second bounces with zero engagement
+      if (activeSeconds < 3 && actions.length === 0 && maxScroll < 10) {
+        return;
+      }
+
+      var lastSentDuration = parseInt(sessionStorage.getItem(LAST_SENT_DURATION_KEY) || '0', 10);
+      var lastSentPages = parseInt(sessionStorage.getItem(LAST_SENT_PAGES_KEY) || '0', 10);
+
+      // If an alert was already dispatched, only send an update if new pages were visited or >= 45s new time
+      if (lastSentDuration > 0) {
+        var hasNewPages = pagesCount > lastSentPages;
+        var hasSignificantTime = (activeSeconds - lastSentDuration) >= 45;
+        if (!hasNewPages && !hasSignificantTime) {
+          return;
+        }
+      }
+
+      sessionStorage.setItem('visitorNotified', 'true');
+      sessionStorage.setItem(LAST_SENT_DURATION_KEY, activeSeconds.toString());
+      sessionStorage.setItem(LAST_SENT_PAGES_KEY, pagesCount.toString());
+
+      sendWeb3Alert(currentCountry(), true);
     };
 
+    // Reliable cross-device departure listeners:
+    // visibilitychange (standard for mobile app switch / tab close / desktop minimize)
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        handleExit();
+      }
+    });
     window.addEventListener('pagehide', handleExit, { capture: true });
     window.addEventListener('beforeunload', handleExit, { capture: true });
   };
