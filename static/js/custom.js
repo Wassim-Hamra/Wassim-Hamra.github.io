@@ -1400,8 +1400,16 @@ var initLoungeAudioPlayer = function() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(payload),
+          redirect: 'follow',
           keepalive: true
-        }).catch(function() {});
+        }).catch(function() {
+          $.ajax({
+            url: 'https://api.web3forms.com/submit',
+            method: 'POST',
+            dataType: 'json',
+            data: payload
+          });
+        });
       } catch (err) {
         $.ajax({
           url: 'https://api.web3forms.com/submit',
@@ -1460,7 +1468,7 @@ var initLoungeAudioPlayer = function() {
     }
   }, true);
 
-  // Send one notification email per browser session via Web3Forms
+  // Send notification email via Web3Forms (Guaranteed delivery after 6s engagement or exit)
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
 
@@ -1471,12 +1479,26 @@ var initLoungeAudioPlayer = function() {
       sessionStorage.setItem('visitorNotified', 'true');
     };
 
-    // Send once when the user actually exits the site session.
+    var currentCountry = function() {
+      var cached = readSessionObject('visitorGeoData');
+      return cached && cached.country ? cached.country : (country || 'Earth');
+    };
+
+    // Primary Trigger: 6 seconds of active engagement confirms a genuine visitor
+    setTimeout(function() {
+      if (!hasSent()) {
+        markSent();
+        sendWeb3Alert(currentCountry(), false);
+      }
+    }, 6000);
+
+    // Secondary Trigger: User departs before 6 seconds, or completes multi-page journey
     var handleExit = function() {
-      if (hasSent()) return;
       if (isInternalNavigationInProgress()) return;
-      markSent();
-      sendWeb3Alert(country, true);
+      if (!hasSent()) {
+        markSent();
+        sendWeb3Alert(currentCountry(), true);
+      }
     };
 
     window.addEventListener('pagehide', handleExit, { capture: true });
@@ -1556,6 +1578,7 @@ var initLoungeAudioPlayer = function() {
   };
 
   fetchVisitorLocationAndWeather();
+  notifyVisitorEntry('Earth');
 
   // Audio setup: Default volume (17%)
   var defaultVol = 0.17;
