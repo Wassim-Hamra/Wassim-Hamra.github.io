@@ -1117,13 +1117,33 @@ var initLoungeAudioPlayer = function() {
     }
   });
 
-  // Global benign interaction listeners
-  $(document).on('click', 'a[href*="linkedin.com"]', function() { recordAction("Viewed LinkedIn Profile"); });
-  $(document).on('click', 'a[href*="github.com"]', function() { recordAction("Viewed GitHub Profile/Repo"); });
-  $(document).on('click', 'a[href*="mail"], a[href*="compose"]', function() { recordAction("Clicked Contact Email"); });
-  $(document).on('click', '.btn-cool-cv', function() { recordAction("Viewed/Downloaded CV"); });
+  // Forward declaration for action notification trigger
+  var notifyActionTrigger = function(actionName) {
+    if (typeof triggerActionNotification === 'function') {
+      triggerActionNotification(actionName);
+    }
+  };
+  $(document).on('click', 'a[href*="linkedin.com"]', function() {
+    recordAction("Viewed LinkedIn Profile");
+    notifyActionTrigger("Viewed LinkedIn Profile");
+  });
+  $(document).on('click', 'a[href*="github.com"]', function() {
+    recordAction("Viewed GitHub Profile/Repo");
+    notifyActionTrigger("Viewed GitHub Profile/Repo");
+  });
+  $(document).on('click', 'a[href*="mail"], a[href*="compose"]', function() {
+    recordAction("Clicked Contact Email");
+    notifyActionTrigger("Clicked Contact Email");
+  });
+  $(document).on('click', '.btn-cool-cv', function() {
+    recordAction("Viewed/Downloaded CV");
+    notifyActionTrigger("Downloaded CV");
+  });
   $(document).on('click', '#cmd-palette-btn', function() { recordAction("Used Command Palette (Ctrl+K)"); });
-  $(document).on('click', '#ai-chat-toggle-btn', function() { recordAction("Opened AI Chatbot"); });
+  $(document).on('click', '#ai-chat-toggle-btn', function() {
+    recordAction("Opened AI Chatbot");
+    notifyActionTrigger("Opened AI Chatbot");
+  });
   $(document).on('click', '#lounge-island-capsule', function() { recordAction("Toggled Dynamic Island"); });
   $(document).on('click', '#github-repos-container .probootstrap-card a, #home-projects-container .probootstrap-card a', function() {
     var projectName = $(this).closest('.probootstrap-card').find('.probootstrap-card-heading').first().text().trim();
@@ -1135,7 +1155,10 @@ var initLoungeAudioPlayer = function() {
       recordAction('Started Contact Form');
     }
   });
-  $(document).on('submit', '#contact-form', function() { recordAction('Submitted Contact Form'); });
+  $(document).on('submit', '#contact-form', function() {
+    recordAction('Submitted Contact Form');
+    notifyActionTrigger('Submitted Contact Form');
+  });
 
   // Get clean referral source
   var getCleanReferrer = function() {
@@ -1265,51 +1288,16 @@ var initLoungeAudioPlayer = function() {
     }
 
     var geoData = readSessionObject('visitorGeoData');
-    var analyticsReport = {
-      generated_at: new Date().toISOString(),
-      session: {
-        started_at: new Date(sessionStartTime).toISOString(),
-        ended_at: new Date().toISOString(),
-        duration_seconds: elapsedSeconds,
-        duration_human: durationText,
-        visitor_type: visitCount > 1 ? "returning" : "new",
-        visit_count: visitCount
-      },
-      journey: {
-        entry_page: flowForEmail[0] || currentPageName,
-        exit_page: flowForEmail[flowForEmail.length - 1] || currentPageName,
-        page_flow: flowForEmail,
-        page_flow_text: flowString,
-        pages_viewed: flowForEmail.filter(function(x) { return x !== 'exit'; }).length,
-        page_durations_seconds: pageDurationsSeconds,
-        page_durations_human: pageDurationsHuman
-      },
-      engagement: {
-        max_scroll_percent: parseInt(maxScroll, 10) || 0,
-        max_scroll_by_page_percent: pageScroll,
-        actions_unique: actions,
-        action_counts: actionCounts,
-        cta_funnel: {
-          cv_clicks: parseInt(actionCounts['Viewed/Downloaded CV'] || 0, 10),
-          github_clicks: parseInt(actionCounts['Viewed GitHub Profile/Repo'] || 0, 10),
-          linkedin_clicks: parseInt(actionCounts['Viewed LinkedIn Profile'] || 0, 10),
-          contact_email_clicks: parseInt(actionCounts['Clicked Contact Email'] || 0, 10),
-          contact_form_started: parseInt(actionCounts['Started Contact Form'] || 0, 10),
-          contact_form_submitted: parseInt(actionCounts['Submitted Contact Form'] || 0, 10),
-          ai_chat_opens: parseInt(actionCounts['Opened AI Chatbot'] || 0, 10)
-        }
-      },
-      context: {
-        country: country || "Unknown",
-        weather: geoData.weatherText || "",
-        timezone: tz,
-        language: lang,
-        traffic_source: referrer,
-        network: network,
-        device: device,
-        visit_time_local: timeStr
-      }
-    };
+    var countryDisplay = country || (geoData && geoData.country ? geoData.country : 'Unknown');
+
+    var subjectText = '';
+    if (alertType === 'initial') {
+      subjectText = '🔔 New Visitor: ' + countryDisplay + ' | Entry: ' + (flowForEmail[0] || currentPageName) + ' (' + durationText + ')';
+    } else if (alertType === 'action') {
+      subjectText = '⚡ Visitor Action: ' + countryDisplay + ' | ' + (customDetail || 'Action') + ' (' + durationText + ')';
+    } else {
+      subjectText = '📊 Journey Update: ' + countryDisplay + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')';
+    }
 
     var emailDivider = '────────────────────────────────';
     var fmtRow = function(emoji, label, value) {
@@ -1337,56 +1325,54 @@ var initLoungeAudioPlayer = function() {
     };
 
     var emailLines = [
-      '📊 Visitor Analytics Report',
+      subjectText,
       emailDivider,
       '',
       '🧭 Session Overview',
-      fmtRow('👤', 'Visitor', analyticsReport.session.visitor_type + ' (visit #' + analyticsReport.session.visit_count + ')'),
-      fmtRow('⏱️', 'Active time', analyticsReport.session.duration_human + ' (' + analyticsReport.session.duration_seconds + 's)'),
-      fmtRow('🕒', 'Started', analyticsReport.session.started_at),
-      fmtRow('🕓', 'Ended', analyticsReport.session.ended_at),
+      fmtRow('👤', 'Visitor', (visitCount > 1 ? 'returning' : 'new') + ' (visit #' + visitCount + ')'),
+      fmtRow('⏱️', 'Active time', durationText + ' (' + elapsedSeconds + 's)'),
+      fmtRow('🕒', 'Started', new Date(sessionStartTime).toLocaleTimeString()),
+      fmtRow('🕓', 'Alert time', new Date().toLocaleTimeString()),
       '',
       '🗺️ Journey',
-      fmtRow('🚪', 'Entry page', analyticsReport.journey.entry_page),
-      fmtRow('🏁', 'Exit page', analyticsReport.journey.exit_page),
-      fmtRow('🔀', 'Flow', analyticsReport.journey.page_flow_text),
-      fmtRow('📄', 'Pages viewed', analyticsReport.journey.pages_viewed),
+      fmtRow('🚪', 'Entry page', flowForEmail[0] || currentPageName),
+      fmtRow('📍', 'Current page', flowForEmail[flowForEmail.length - 1] || currentPageName),
+      fmtRow('🔀', 'Flow', flowString),
+      fmtRow('📄', 'Pages viewed', flowForEmail.length),
       '',
       '⏳ Time per page',
-      formatObjectLines(analyticsReport.journey.page_durations_human, '').join('\n'),
+      formatObjectLines(pageDurationsHuman, '').join('\n'),
       '',
       '📈 Engagement',
-      fmtRow('📜', 'Max scroll', analyticsReport.engagement.max_scroll_percent + '%'),
+      fmtRow('📜', 'Max scroll', (parseInt(maxScroll, 10) || 0) + '%'),
       '',
       '📑 Scroll by page',
-      formatObjectLines(analyticsReport.engagement.max_scroll_by_page_percent, '%').join('\n'),
+      formatObjectLines(pageScroll, '%').join('\n'),
       '',
       '⚡ Actions (count)',
-      formatActionCountLines(analyticsReport.engagement.action_counts).join('\n'),
+      formatActionCountLines(actionCounts).join('\n'),
       '',
       '🎯 CTA Funnel',
-      fmtRow('📄', 'CV clicks', analyticsReport.engagement.cta_funnel.cv_clicks),
-      fmtRow('🐙', 'GitHub clicks', analyticsReport.engagement.cta_funnel.github_clicks),
-      fmtRow('💼', 'LinkedIn clicks', analyticsReport.engagement.cta_funnel.linkedin_clicks),
-      fmtRow('✉️', 'Email clicks', analyticsReport.engagement.cta_funnel.contact_email_clicks),
-      fmtRow('📝', 'Form started', analyticsReport.engagement.cta_funnel.contact_form_started),
-      fmtRow('✅', 'Form submitted', analyticsReport.engagement.cta_funnel.contact_form_submitted),
-      fmtRow('🤖', 'AI chat opens', analyticsReport.engagement.cta_funnel.ai_chat_opens),
+      fmtRow('📄', 'CV clicks', parseInt(actionCounts['Viewed/Downloaded CV'] || 0, 10)),
+      fmtRow('🐙', 'GitHub clicks', parseInt(actionCounts['Viewed GitHub Profile/Repo'] || 0, 10)),
+      fmtRow('💼', 'LinkedIn clicks', parseInt(actionCounts['Viewed LinkedIn Profile'] || 0, 10)),
+      fmtRow('✉️', 'Email clicks', parseInt(actionCounts['Clicked Contact Email'] || 0, 10)),
+      fmtRow('📝', 'Form started', parseInt(actionCounts['Started Contact Form'] || 0, 10)),
+      fmtRow('✅', 'Form submitted', parseInt(actionCounts['Submitted Contact Form'] || 0, 10)),
+      fmtRow('🤖', 'AI chat opens', parseInt(actionCounts['Opened AI Chatbot'] || 0, 10)),
       '',
       '🌍 Context',
-      fmtRow('📍', 'Country', analyticsReport.context.country),
-      fmtRow('🌤️', 'Weather', analyticsReport.context.weather || 'N/A'),
-      fmtRow('🧭', 'Timezone', analyticsReport.context.timezone),
-      fmtRow('🗣️', 'Language', analyticsReport.context.language),
-      fmtRow('🔗', 'Source', analyticsReport.context.traffic_source),
-      fmtRow('📶', 'Network', analyticsReport.context.network),
-      fmtRow('💻', 'Device', (analyticsReport.context.device.is_mobile ? 'mobile' : 'desktop') + ' | ' + analyticsReport.context.device.os + ' | ' + analyticsReport.context.device.browser + ' | ' + analyticsReport.context.device.screen),
-      fmtRow('🕘', 'Local visit time', analyticsReport.context.visit_time_local)
+      fmtRow('📍', 'Country', countryDisplay),
+      fmtRow('🌤️', 'Weather', (geoData && geoData.weatherText) ? geoData.weatherText : 'N/A'),
+      fmtRow('🧭', 'Timezone', tz),
+      fmtRow('🗣️', 'Language', lang),
+      fmtRow('🔗', 'Source', referrer),
+      fmtRow('📶', 'Network', network),
+      fmtRow('💻', 'Device', (device.is_mobile ? 'mobile' : 'desktop') + ' | ' + device.os + ' | ' + device.browser + ' | ' + device.screen),
+      fmtRow('🕘', 'Local visit time', timeStr)
     ];
 
     var emailMessage = emailLines.join('\n');
-
-    var subjectText = '📊 Visitor Analytics: ' + (country || 'Unknown') + ' | ' + (flowForEmail[0] || currentPageName) + ' → ' + (flowForEmail[flowForEmail.length - 1] || currentPageName) + ' (' + durationText + ')';
 
     var formData = new FormData();
     formData.append('access_key', '7d50b277-b05f-4d36-a340-db1f5dcac793');
@@ -1395,140 +1381,92 @@ var initLoungeAudioPlayer = function() {
     formData.append('message', emailMessage);
     formData.append('flow', flowString);
 
-    var beaconSent = false;
-    if (navigator.sendBeacon) {
-      try {
-        beaconSent = navigator.sendBeacon('https://api.web3forms.com/submit', formData);
-      } catch (e) {
-        beaconSent = false;
-      }
-    }
-
-    if (!beaconSent && typeof fetch === 'function') {
-      try {
-        fetch('https://api.web3forms.com/submit', {
+    if (typeof fetch === 'function') {
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      }).catch(function() {
+        $.ajax({
+          url: 'https://api.web3forms.com/submit',
           method: 'POST',
-          body: formData,
-          keepalive: true
-        }).catch(function() {});
-      } catch (err) {}
+          dataType: 'json',
+          data: {
+            access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+            subject: subjectText,
+            from_name: 'Portfolio Visitor Alert',
+            message: emailMessage,
+            flow: flowString
+          }
+        });
+      });
+    } else {
+      $.ajax({
+        url: 'https://api.web3forms.com/submit',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+          subject: subjectText,
+          from_name: 'Portfolio Visitor Alert',
+          message: emailMessage,
+          flow: flowString
+        }
+      });
     }
   };
 
-  var INTERNAL_NAV_UNTIL_KEY = 'portfolioInternalNavUntil';
-  var INTERNAL_NAV_WINDOW_MS = 6000;
-  var navUntilAtBoot = parseInt(sessionStorage.getItem(INTERNAL_NAV_UNTIL_KEY) || '0', 10);
-  if (navUntilAtBoot > Date.now()) {
-    sessionStorage.removeItem(INTERNAL_NAV_UNTIL_KEY);
-  }
+  var getSessionCountry = function(fallback) {
+    var cached = readSessionObject('visitorGeoData');
+    return cached && cached.country ? cached.country : (fallback || 'Earth');
+  };
 
-  var isLikelyInternalLink = function(anchor) {
-    if (!anchor || !anchor.getAttribute) return false;
-    if (anchor.getAttribute('target') === '_blank') return false;
-    var href = anchor.getAttribute('href') || '';
-    if (!href || href === '#' || href.indexOf('javascript:') === 0) return false;
-    if (href.indexOf('mailto:') === 0 || href.indexOf('tel:') === 0) return false;
-
+  // High-value action notification trigger (debounced per action type)
+  var triggerActionNotification = function(actionName) {
+    if (isBot) return;
+    var notifiedActions = [];
     try {
-      var url = new URL(href, window.location.href);
-      return url.origin === window.location.origin;
-    } catch (e) {
-      return false;
+      notifiedActions = JSON.parse(sessionStorage.getItem('portfolioNotifiedActions') || '[]');
+    } catch (e) {}
+    if (notifiedActions.indexOf(actionName) === -1) {
+      notifiedActions.push(actionName);
+      sessionStorage.setItem('portfolioNotifiedActions', JSON.stringify(notifiedActions));
+      sendWeb3Alert(getSessionCountry(), 'action', actionName);
     }
   };
-
-  var markInternalNavigation = function() {
-    sessionStorage.setItem(INTERNAL_NAV_UNTIL_KEY, (Date.now() + INTERNAL_NAV_WINDOW_MS).toString());
-  };
-
-  var isInternalNavigationInProgress = function() {
-    var until = parseInt(sessionStorage.getItem(INTERNAL_NAV_UNTIL_KEY) || '0', 10);
-    return until > Date.now();
-  };
-
-  // Mark in-site page transitions so they are not treated as session exits.
-  document.addEventListener('click', function(e) {
-    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
-    var target = e.target;
-    var anchor = target && target.closest ? target.closest('a') : null;
-    if (isLikelyInternalLink(anchor)) {
-      markInternalNavigation();
-    }
-  }, true);
-
-  document.addEventListener('submit', function(e) {
-    var form = e.target;
-    if (form && form.id === 'contact-form') {
-      markInternalNavigation();
-    }
-  }, true);
 
   var isNotifyRegistered = false;
-  // Send full journey analytics when the visitor finishes/exits their browsing session
+  // Send Option B notifications: 6s initial alert + page navigation updates + departure backup
   var notifyVisitorEntry = function(country) {
     if (isBot) return;
     if (isNotifyRegistered) return;
     isNotifyRegistered = true;
 
-    var LAST_SENT_DURATION_KEY = 'portfolioLastSentDuration';
-    var LAST_SENT_PAGES_KEY = 'portfolioLastSentPages';
+    // Trigger 1: Initial Entry Alert at 6 seconds (confirms real visitor, avoids bots)
+    if (!sessionStorage.getItem('visitorInitialNotified')) {
+      setTimeout(function() {
+        if (!sessionStorage.getItem('visitorInitialNotified')) {
+          sessionStorage.setItem('visitorInitialNotified', 'true');
+          sessionStorage.setItem('portfolioNotifiedPageCount', pageFlow.length.toString());
+          sendWeb3Alert(getSessionCountry(country), 'initial');
+        }
+      }, 6000);
+    }
 
-    var currentCountry = function() {
-      var cached = readSessionObject('visitorGeoData');
-      return cached && cached.country ? cached.country : (country || 'Earth');
-    };
+    // Trigger 2: Page Navigation Journey Update (when user explores a new page)
+    var lastNotifiedCount = parseInt(sessionStorage.getItem('portfolioNotifiedPageCount') || '1', 10);
+    if (pageFlow.length > lastNotifiedCount) {
+      setTimeout(function() {
+        sessionStorage.setItem('portfolioNotifiedPageCount', pageFlow.length.toString());
+        sendWeb3Alert(getSessionCountry(country), 'journey');
+      }, 2500);
+    }
 
+    // Trigger 3: Departure / Exit Backup (if user leaves after exploring)
     var handleExit = function() {
       if (isInternalNavigationInProgress()) return;
-
       flushCurrentPageDuration();
-
-      var pageDurationsMs = readSessionObject(PAGE_DURATIONS_KEY);
-      var totalActiveMs = 0;
-      Object.keys(pageDurationsMs).forEach(function(page) {
-        totalActiveMs += Math.max(0, parseInt(pageDurationsMs[page] || 0, 10));
-      });
-      var activeSeconds = Math.round(totalActiveMs / 1000);
-      if (activeSeconds <= 0) {
-        activeSeconds = Math.max(1, Math.round((Date.now() - sessionStartTime) / 1000));
-      }
-
-      var currentFlow = [];
-      try {
-        currentFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
-      } catch (e) { currentFlow = pageFlow; }
-      var pagesCount = currentFlow.length;
-
-      var actions = [];
-      try { actions = JSON.parse(sessionStorage.getItem('portfolioActions') || '[]'); } catch (e) {}
-      var maxScroll = parseInt(sessionStorage.getItem('portfolioMaxScroll') || '0', 10);
-
-      // Filter out accidental 1-2 second bounces with zero engagement
-      if (activeSeconds < 3 && actions.length === 0 && maxScroll < 10) {
-        return;
-      }
-
-      var lastSentDuration = parseInt(sessionStorage.getItem(LAST_SENT_DURATION_KEY) || '0', 10);
-      var lastSentPages = parseInt(sessionStorage.getItem(LAST_SENT_PAGES_KEY) || '0', 10);
-
-      // If an alert was already dispatched, only send an update if new pages were visited or >= 45s new time
-      if (lastSentDuration > 0) {
-        var hasNewPages = pagesCount > lastSentPages;
-        var hasSignificantTime = (activeSeconds - lastSentDuration) >= 45;
-        if (!hasNewPages && !hasSignificantTime) {
-          return;
-        }
-      }
-
-      sessionStorage.setItem('visitorNotified', 'true');
-      sessionStorage.setItem(LAST_SENT_DURATION_KEY, activeSeconds.toString());
-      sessionStorage.setItem(LAST_SENT_PAGES_KEY, pagesCount.toString());
-
-      sendWeb3Alert(currentCountry(), true);
     };
 
-    // Reliable cross-device departure listeners:
-    // visibilitychange (standard for mobile app switch / tab close / desktop minimize)
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'hidden') {
         handleExit();
