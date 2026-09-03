@@ -1,4 +1,8 @@
-﻿User-agent: *
+User-agent: *
 Allow: /
+Disallow: /404.html
+Disallow: /message_sent.html
+Disallow: /under_development.html
+Disallow: /single-page.html
 
 Sitemap: https://wassimhamra.tech/sitemap.xml
