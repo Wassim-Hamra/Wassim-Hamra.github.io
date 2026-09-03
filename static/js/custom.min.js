@@ -1226,7 +1226,7 @@ var initLoungeAudioPlayer = function() {
     return type + " (" + saveData + ")";
   };
 
-  var sendWeb3Alert = function(country, isFinalUpdate) {
+  var sendWeb3Alert = function(country, alertType, customDetail) {
     flushCurrentPageDuration();
     var elapsedSeconds = 0;
     var durationText = '0s';
@@ -1236,7 +1236,7 @@ var initLoungeAudioPlayer = function() {
       currentFlow = JSON.parse(sessionStorage.getItem('visitorPageFlow') || '[]');
     } catch (e) { currentFlow = pageFlow; }
     var flowForEmail = currentFlow.length > 0 ? currentFlow.slice() : [currentPageName];
-    if (isFinalUpdate && flowForEmail[flowForEmail.length - 1] !== 'exit') {
+    if (alertType === 'exit' && flowForEmail[flowForEmail.length - 1] !== 'exit') {
       flowForEmail.push('exit');
     }
     var flowString = flowForEmail.join(' → ');
