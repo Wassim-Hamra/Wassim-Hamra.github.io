@@ -1376,8 +1376,10 @@ var initLoungeAudioPlayer = function() {
 
     var formData = new FormData();
     formData.append('access_key', '7d50b277-b05f-4d36-a340-db1f5dcac793');
-    formData.append('subject', subjectText);
+    formData.append('name', 'Portfolio Analytics');
+    formData.append('email', 'analytics@wassimhamra.tech');
     formData.append('from_name', 'Portfolio Visitor Alert');
+    formData.append('subject', subjectText);
     formData.append('message', emailMessage);
     formData.append('flow', flowString);
 
@@ -1385,6 +1387,8 @@ var initLoungeAudioPlayer = function() {
       fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         body: formData
+      }).then(function() {
+        try { console.log('📡 [Analytics] Alert dispatched:', alertType, subjectText); } catch (e) {}
       }).catch(function() {
         $.ajax({
           url: 'https://api.web3forms.com/submit',
@@ -1392,6 +1396,8 @@ var initLoungeAudioPlayer = function() {
           dataType: 'json',
           data: {
             access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+            name: 'Portfolio Analytics',
+            email: 'analytics@wassimhamra.tech',
             subject: subjectText,
             from_name: 'Portfolio Visitor Alert',
             message: emailMessage,
@@ -1406,6 +1412,8 @@ var initLoungeAudioPlayer = function() {
         dataType: 'json',
         data: {
           access_key: '7d50b277-b05f-4d36-a340-db1f5dcac793',
+          name: 'Portfolio Analytics',
+          email: 'analytics@wassimhamra.tech',
           subject: subjectText,
           from_name: 'Portfolio Visitor Alert',
           message: emailMessage,
@@ -1463,7 +1471,6 @@ var initLoungeAudioPlayer = function() {
 
     // Trigger 3: Departure / Exit Backup (if user leaves after exploring)
     var handleExit = function() {
-      if (isInternalNavigationInProgress()) return;
       flushCurrentPageDuration();
     };
 
